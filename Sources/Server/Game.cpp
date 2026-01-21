@@ -5572,200 +5572,11 @@ void CGame::_ClearItemConfigList() {
   }
 }
 
-//------------------------------------------------------------------------------
-// Hot Reload Items - Update an existing item instance from config
-// Preserves instance data: m_dwCount, m_wCurLifeSpan, m_dwAttribute, m_sX, m_sY
-//------------------------------------------------------------------------------
-void CGame::UpdateExistingItemFromConfig(CItem *pItem) {
-  if (pItem == nullptr) return;
-  
-  int iItemID = pItem->m_sIDnum;
-  if (iItemID < 0 || iItemID >= DEF_MAXITEMTYPES) return;
-  if (m_pItemConfigList[iItemID] == nullptr) return;
-  
-  CItem *pConfig = m_pItemConfigList[iItemID];
-  
-  // Update base properties from config (preserve instance data)
-  pItem->m_cItemType = pConfig->m_cItemType;
-  pItem->m_cEquipPos = pConfig->m_cEquipPos;
-  pItem->m_sItemEffectType = pConfig->m_sItemEffectType;
-  pItem->m_sItemEffectValue1 = pConfig->m_sItemEffectValue1;
-  pItem->m_sItemEffectValue2 = pConfig->m_sItemEffectValue2;
-  pItem->m_sItemEffectValue3 = pConfig->m_sItemEffectValue3;
-  pItem->m_sItemEffectValue4 = pConfig->m_sItemEffectValue4;
-  pItem->m_sItemEffectValue5 = pConfig->m_sItemEffectValue5;
-  pItem->m_sItemEffectValue6 = pConfig->m_sItemEffectValue6;
-  pItem->m_wMaxLifeSpan = pConfig->m_wMaxLifeSpan;
-  pItem->m_sSpecialEffect = pConfig->m_sSpecialEffect;
-  pItem->m_sSpecialEffectValue1 = pConfig->m_sSpecialEffectValue1;
-  pItem->m_sSpecialEffectValue2 = pConfig->m_sSpecialEffectValue2;
-  pItem->m_sSprite = pConfig->m_sSprite;
-  pItem->m_sSpriteFrame = pConfig->m_sSpriteFrame;
-  pItem->m_wPrice = pConfig->m_wPrice;
-  pItem->m_wWeight = pConfig->m_wWeight;
-  pItem->m_cApprValue = pConfig->m_cApprValue;
-  pItem->m_cSpeed = pConfig->m_cSpeed;
-  pItem->m_sLevelLimit = pConfig->m_sLevelLimit;
-  pItem->m_cGenderLimit = pConfig->m_cGenderLimit;
-  pItem->m_sRelatedSkill = pConfig->m_sRelatedSkill;
-  pItem->m_cCategory = pConfig->m_cCategory;
-  pItem->m_bIsForSale = pConfig->m_bIsForSale;
-  
-  // Note: Preserved instance data (NOT updated):
-  // - m_dwCount (stack count)
-  // - m_wCurLifeSpan (current durability)
-  // - m_dwAttribute (item enchantments/upgrades)
-  // - m_sX, m_sY (inventory position)
-  // - m_cItemColor (may be instance-specific)
-}
-
-//------------------------------------------------------------------------------
-// Hot Reload Items - Update all existing items in the game world
-//------------------------------------------------------------------------------
-void CGame::UpdateAllExistingItems() {
-  int iUpdatedCount = 0;
-  int iNotifiedCount = 0;
-  int iRecalcCount = 0;
-  
-  // 1. Update items in player inventories and banks
-  for (int iClientH = 1; iClientH < DEF_MAXCLIENTS; iClientH++) {
-    if (m_pClientList[iClientH] == nullptr) continue;
-    
-    bool bClientConnected = m_pClientList[iClientH]->m_bIsInitComplete;
-    
-    // Update inventory items
-    for (int i = 0; i < DEF_MAXITEMS; i++) {
-      if (m_pClientList[iClientH]->m_pItemList[i] != nullptr) {
-        UpdateExistingItemFromConfig(m_pClientList[iClientH]->m_pItemList[i]);
-        iUpdatedCount++;
-        
-        // Notify client about the updated max_lifespan
-        if (bClientConnected) {
-          SendNotifyMsg(0, iClientH, DEF_NOTIFY_MAXLIFESPAN, i,
-                        m_pClientList[iClientH]->m_pItemList[i]->m_wMaxLifeSpan, 0, 0);
-          iNotifiedCount++;
-        }
-      }
-    }
-    
-    // Update bank items (no notification needed for bank items as they're not displayed)
-    for (int i = 0; i < DEF_MAXBANKITEMS; i++) {
-      if (m_pClientList[iClientH]->m_pItemInBankList[i] != nullptr) {
-        UpdateExistingItemFromConfig(m_pClientList[iClientH]->m_pItemInBankList[i]);
-        iUpdatedCount++;
-      }
-    }
-    
-    // Recalculate player stats based on equipped items (for damage, defense, etc.)
-    if (bClientConnected) {
-      CalcTotalItemEffect(iClientH, -1, true);
-      iRecalcCount++;
-    }
-  }
-  
-  // 2. Update items on the ground (in map tiles)
-  for (int iMapIndex = 0; iMapIndex < DEF_MAXMAPS; iMapIndex++) {
-    if (m_pMapList[iMapIndex] == nullptr) continue;
-    
-    CMap *pMap = m_pMapList[iMapIndex];
-    if (pMap->m_pTile == nullptr) continue;
-    
-    int iTotalTiles = pMap->m_sSizeX * pMap->m_sSizeY;
-    for (int iTile = 0; iTile < iTotalTiles; iTile++) {
-      CTile *pTile = &pMap->m_pTile[iTile];
-      for (int iItem = 0; iItem < DEF_TILE_PER_ITEMS; iItem++) {
-        if (pTile->m_pItem[iItem] != nullptr) {
-          UpdateExistingItemFromConfig(pTile->m_pItem[iItem]);
-          iUpdatedCount++;
-        }
-      }
-    }
-  }
-  
-  std::snprintf(G_cTxt, sizeof(G_cTxt), "(!) Hot Reload: Updated %d items, sent %d notifications, recalculated stats for %d players", 
-                iUpdatedCount, iNotifiedCount, iRecalcCount);
-  PutLogList(G_cTxt);
-}
-
-//------------------------------------------------------------------------------
-// Hot Reload Items - Broadcast new item configs to all connected clients
-//------------------------------------------------------------------------------
-void CGame::BroadcastItemConfigsToAllClients() {
-  int iClientCount = 0;
-  
-  for (int iClientH = 1; iClientH < DEF_MAXCLIENTS; iClientH++) {
-    if (m_pClientList[iClientH] != nullptr && 
-        m_pClientList[iClientH]->m_bIsInitComplete) {
-      bSendClientItemConfigs(iClientH);
-      iClientCount++;
-    }
-  }
-  
-  std::snprintf(G_cTxt, sizeof(G_cTxt), "(!) Hot Reload: Sent item configs to %d clients", iClientCount);
-  PutLogList(G_cTxt);
-}
-
-//------------------------------------------------------------------------------
-// Hot Reload Items - Main reload function
-//------------------------------------------------------------------------------
-bool CGame::ReloadItemConfigs() {
-  PutLogList("(!) Hot Reload: Reloading item configurations...");
-  
-  // Open the configuration database
-  sqlite3 *configDb = nullptr;
-  std::string configDbPath;
-  bool configDbCreated = false;
-  
-  if (!EnsureGameConfigDatabase(&configDb, configDbPath, &configDbCreated) ||
-      configDbCreated) {
-    PutLogList("(!!!) Hot Reload FAILED: GameConfigs.db unavailable");
-    return false;
-  }
-  
-  if (!HasGameConfigRows(configDb, "items")) {
-    PutLogList("(!!!) Hot Reload FAILED: No items table in GameConfigs.db");
-    CloseGameConfigDatabase(configDb);
-    return false;
-  }
-  
-  // Create temporary array for new configs
-  CItem *pNewConfigList[DEF_MAXITEMTYPES];
-  for (int i = 0; i < DEF_MAXITEMTYPES; i++) {
-    pNewConfigList[i] = nullptr;
-  }
-  
-  // Load new configurations
-  if (!LoadItemConfigs(configDb, pNewConfigList, DEF_MAXITEMTYPES)) {
-    PutLogList("(!!!) Hot Reload FAILED: Could not load items from database");
-    // Clean up any partially loaded items
-    for (int i = 0; i < DEF_MAXITEMTYPES; i++) {
-      if (pNewConfigList[i] != nullptr) {
-        delete pNewConfigList[i];
-      }
-    }
-    CloseGameConfigDatabase(configDb);
-    return false;
-  }
-  
-  CloseGameConfigDatabase(configDb);
-  
-  // Replace old configs with new ones
-  for (int i = 0; i < DEF_MAXITEMTYPES; i++) {
-    if (m_pItemConfigList[i] != nullptr) {
-      delete m_pItemConfigList[i];
-    }
-    m_pItemConfigList[i] = pNewConfigList[i];
-  }
-  
-  // Update all existing items in the world
-  UpdateAllExistingItems();
-  
-  // Broadcast new configs to all connected clients
-  BroadcastItemConfigsToAllClients();
-  
-  PutLogList("(!) Hot Reload: Item configurations reloaded successfully!");
-  return true;
-}
+// NOTE: Hot Reload functions moved to Game_HotReload.cpp
+// Functions: ReloadItemConfigs, ReloadMagicConfigs, ReloadSkillConfigs,
+//            ReloadSettingsConfigs, ReloadDropTables, ReloadAllConfigs,
+//            UpdateExistingItemFromConfig, UpdateAllExistingItems,
+//            BroadcastItemConfigsToAllClients
 
 // Helper function to normalize item name for comparison (removes spaces and
 // underscores)
@@ -6323,10 +6134,23 @@ void CGame::ChatMsgHandler(int iClientH, char *pData, uint32_t dwMsgSize) {
     break;
 
   case '/':
-    // GM Commands
+    // GM Commands - Hot Reload System
     if (m_pClientList[iClientH]->m_iAdminUserLevel >= 3) {
+      // /reloadall - Hot reload ALL configurations from database
+      if (strncmp(cp, "/reloadall", 10) == 0) {
+        std::snprintf(G_cTxt, sizeof(G_cTxt), "(!) GM %s requested ALL config reload", 
+                      m_pClientList[iClientH]->m_cCharName);
+        PutLogList(G_cTxt);
+        if (ReloadAllConfigs()) {
+          SendNotifyMsg(0, iClientH, DEF_NOTIFY_NOTICEMSG, 0, 0, 0, 
+                        "All configs reloaded successfully!");
+        } else {
+          SendNotifyMsg(0, iClientH, DEF_NOTIFY_NOTICEMSG, 0, 0, 0, 
+                        "Some config reloads FAILED! Check server logs.");
+        }
+      }
       // /reloaditems - Hot reload item configurations from database
-      if (strncmp(cp, "/reloaditems", 12) == 0) {
+      else if (strncmp(cp, "/reloaditems", 12) == 0) {
         std::snprintf(G_cTxt, sizeof(G_cTxt), "(!) GM %s requested item config reload", 
                       m_pClientList[iClientH]->m_cCharName);
         PutLogList(G_cTxt);
@@ -6336,6 +6160,58 @@ void CGame::ChatMsgHandler(int iClientH, char *pData, uint32_t dwMsgSize) {
         } else {
           SendNotifyMsg(0, iClientH, DEF_NOTIFY_NOTICEMSG, 0, 0, 0, 
                         "Item config reload FAILED! Check server logs.");
+        }
+      }
+      // /reloadmagic - Hot reload magic configurations from database
+      else if (strncmp(cp, "/reloadmagic", 12) == 0) {
+        std::snprintf(G_cTxt, sizeof(G_cTxt), "(!) GM %s requested magic config reload", 
+                      m_pClientList[iClientH]->m_cCharName);
+        PutLogList(G_cTxt);
+        if (ReloadMagicConfigs()) {
+          SendNotifyMsg(0, iClientH, DEF_NOTIFY_NOTICEMSG, 0, 0, 0, 
+                        "Magic configs reloaded successfully!");
+        } else {
+          SendNotifyMsg(0, iClientH, DEF_NOTIFY_NOTICEMSG, 0, 0, 0, 
+                        "Magic config reload FAILED! Check server logs.");
+        }
+      }
+      // /reloadskills - Hot reload skill configurations from database
+      else if (strncmp(cp, "/reloadskills", 13) == 0) {
+        std::snprintf(G_cTxt, sizeof(G_cTxt), "(!) GM %s requested skill config reload", 
+                      m_pClientList[iClientH]->m_cCharName);
+        PutLogList(G_cTxt);
+        if (ReloadSkillConfigs()) {
+          SendNotifyMsg(0, iClientH, DEF_NOTIFY_NOTICEMSG, 0, 0, 0, 
+                        "Skill configs reloaded successfully!");
+        } else {
+          SendNotifyMsg(0, iClientH, DEF_NOTIFY_NOTICEMSG, 0, 0, 0, 
+                        "Skill config reload FAILED! Check server logs.");
+        }
+      }
+      // /reloadsettings - Hot reload settings from database
+      else if (strncmp(cp, "/reloadsettings", 15) == 0) {
+        std::snprintf(G_cTxt, sizeof(G_cTxt), "(!) GM %s requested settings reload", 
+                      m_pClientList[iClientH]->m_cCharName);
+        PutLogList(G_cTxt);
+        if (ReloadSettingsConfigs()) {
+          SendNotifyMsg(0, iClientH, DEF_NOTIFY_NOTICEMSG, 0, 0, 0, 
+                        "Settings reloaded successfully!");
+        } else {
+          SendNotifyMsg(0, iClientH, DEF_NOTIFY_NOTICEMSG, 0, 0, 0, 
+                        "Settings reload FAILED! Check server logs.");
+        }
+      }
+      // /reloaddrops - Hot reload drop tables from database
+      else if (strncmp(cp, "/reloaddrops", 12) == 0) {
+        std::snprintf(G_cTxt, sizeof(G_cTxt), "(!) GM %s requested drop table reload", 
+                      m_pClientList[iClientH]->m_cCharName);
+        PutLogList(G_cTxt);
+        if (ReloadDropTables()) {
+          SendNotifyMsg(0, iClientH, DEF_NOTIFY_NOTICEMSG, 0, 0, 0, 
+                        "Drop tables reloaded successfully!");
+        } else {
+          SendNotifyMsg(0, iClientH, DEF_NOTIFY_NOTICEMSG, 0, 0, 0, 
+                        "Drop table reload FAILED! Check server logs.");
         }
       }
     }

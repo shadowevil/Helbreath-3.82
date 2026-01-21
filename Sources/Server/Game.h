@@ -901,8 +901,15 @@ public:
   void _ClearItemConfigList();
   bool _bRegisterMap(char *pName);
 
-  // Hot Reload Items
+  //============================================================================
+  // Hot Reload System (implementation in Game_HotReload.cpp)
+  //============================================================================
   bool ReloadItemConfigs();
+  bool ReloadMagicConfigs();
+  bool ReloadSkillConfigs();
+  bool ReloadSettingsConfigs();
+  bool ReloadDropTables();
+  bool ReloadAllConfigs();
   void UpdateExistingItemFromConfig(class CItem *pItem);
   void UpdateAllExistingItems();
   void BroadcastItemConfigsToAllClients();

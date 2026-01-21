@@ -185,6 +185,7 @@
     <ClCompile Include="CommonTypes.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Game_HotReload.cpp" />
     <ClCompile Include="GameConfigSqliteStore.cpp" />
     <ClCompile Include="MapInfoSqliteStore.cpp" />
     <ClCompile Include="LoginServer.cpp" />

@@ -541,10 +541,23 @@ void ProcessConsoleCommand(const char* cmd)
 	if (strcmp(cmd, "help") == 0 || strcmp(cmd, "?") == 0) {
 		printf("\n=== Server Console Commands ===\n");
 		printf("  help, ?         - Show this help message\n");
-		printf("  reloaditems     - Hot reload item configurations from database\n");
+		printf("  reloadall       - Hot reload ALL configurations\n");
+		printf("  reloaditems     - Hot reload item configurations\n");
+		printf("  reloadmagic     - Hot reload magic configurations\n");
+		printf("  reloadskills    - Hot reload skill configurations\n");
+		printf("  reloadsettings  - Hot reload settings (drop rates, etc.)\n");
+		printf("  reloaddrops     - Hot reload drop tables\n");
 		printf("  status          - Show server status\n");
 		printf("  quit, exit      - Shutdown the server\n");
 		printf("================================\n\n");
+	}
+	else if (strcmp(cmd, "reloadall") == 0) {
+		printf("\n[CONSOLE] Executing ALL config reload...\n");
+		if (G_pGame != nullptr && G_pGame->ReloadAllConfigs()) {
+			printf("[CONSOLE] All configs reloaded successfully!\n\n");
+		} else {
+			printf("[CONSOLE] Some config reloads FAILED! Check server logs.\n\n");
+		}
 	}
 	else if (strcmp(cmd, "reloaditems") == 0) {
 		printf("\n[CONSOLE] Executing item config reload...\n");
@@ -552,6 +565,38 @@ void ProcessConsoleCommand(const char* cmd)
 			printf("[CONSOLE] Item configs reloaded successfully!\n\n");
 		} else {
 			printf("[CONSOLE] Item config reload FAILED! Check server logs.\n\n");
+		}
+	}
+	else if (strcmp(cmd, "reloadmagic") == 0) {
+		printf("\n[CONSOLE] Executing magic config reload...\n");
+		if (G_pGame != nullptr && G_pGame->ReloadMagicConfigs()) {
+			printf("[CONSOLE] Magic configs reloaded successfully!\n\n");
+		} else {
+			printf("[CONSOLE] Magic config reload FAILED! Check server logs.\n\n");
+		}
+	}
+	else if (strcmp(cmd, "reloadskills") == 0) {
+		printf("\n[CONSOLE] Executing skill config reload...\n");
+		if (G_pGame != nullptr && G_pGame->ReloadSkillConfigs()) {
+			printf("[CONSOLE] Skill configs reloaded successfully!\n\n");
+		} else {
+			printf("[CONSOLE] Skill config reload FAILED! Check server logs.\n\n");
+		}
+	}
+	else if (strcmp(cmd, "reloadsettings") == 0) {
+		printf("\n[CONSOLE] Executing settings reload...\n");
+		if (G_pGame != nullptr && G_pGame->ReloadSettingsConfigs()) {
+			printf("[CONSOLE] Settings reloaded successfully!\n\n");
+		} else {
+			printf("[CONSOLE] Settings reload FAILED! Check server logs.\n\n");
+		}
+	}
+	else if (strcmp(cmd, "reloaddrops") == 0) {
+		printf("\n[CONSOLE] Executing drop table reload...\n");
+		if (G_pGame != nullptr && G_pGame->ReloadDropTables()) {
+			printf("[CONSOLE] Drop tables reloaded successfully!\n\n");
+		} else {
+			printf("[CONSOLE] Drop table reload FAILED! Check server logs.\n\n");
 		}
 	}
 	else if (strcmp(cmd, "status") == 0) {
