@@ -782,6 +782,18 @@ namespace NetworkMessageHandlers {
 		pGame->m_pItemList[iItemIndex]->m_wCurLifeSpan = static_cast<WORD>(pkt->cur_lifespan);
 	}
 
+	void HandleMaxLifeSpan(CGame* pGame, char* pData)
+	{
+		// Hot reload: Update max lifespan of an item
+		const auto* pkt = hb::net::PacketCast<hb::net::PacketNotifyMaxLifeSpan>(
+			pData, sizeof(hb::net::PacketNotifyMaxLifeSpan));
+		if (!pkt) return;
+		int iItemIndex = pkt->item_index;
+		if (iItemIndex >= 0 && iItemIndex < DEF_MAXITEMS && pGame->m_pItemList[iItemIndex] != nullptr) {
+			pGame->m_pItemList[iItemIndex]->m_wMaxLifeSpan = static_cast<WORD>(pkt->max_lifespan);
+		}
+	}
+
 	void HandleNotEnoughGold(CGame* pGame, char* pData)
 	{
 		pGame->m_dialogBoxManager.DisableDialogBox(DialogBoxId::SellOrRepair);

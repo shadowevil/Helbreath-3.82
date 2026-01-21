@@ -27,6 +27,7 @@
 #include <mmsystem.h>
 #include <time.h>
 #include <cstring>
+#include <conio.h>
 #include "winmain.h"
 #include "Game.h"
 #include "UserMessages.h"
@@ -523,6 +524,87 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow)
 	return (true);
 }
 
+//------------------------------------------------------------------------------
+// Console Command Processing
+//------------------------------------------------------------------------------
+static char g_cConsoleBuffer[256] = {};
+static int g_iConsoleBufferPos = 0;
+
+void ProcessConsoleCommand(const char* cmd)
+{
+	if (cmd == nullptr || *cmd == '\0') return;
+	
+	// Trim leading whitespace
+	while (*cmd == ' ' || *cmd == '\t') cmd++;
+	if (*cmd == '\0') return;
+	
+	if (strcmp(cmd, "help") == 0 || strcmp(cmd, "?") == 0) {
+		printf("\n=== Server Console Commands ===\n");
+		printf("  help, ?         - Show this help message\n");
+		printf("  reloaditems     - Hot reload item configurations from database\n");
+		printf("  status          - Show server status\n");
+		printf("  quit, exit      - Shutdown the server\n");
+		printf("================================\n\n");
+	}
+	else if (strcmp(cmd, "reloaditems") == 0) {
+		printf("\n[CONSOLE] Executing item config reload...\n");
+		if (G_pGame != nullptr && G_pGame->ReloadItemConfigs()) {
+			printf("[CONSOLE] Item configs reloaded successfully!\n\n");
+		} else {
+			printf("[CONSOLE] Item config reload FAILED! Check server logs.\n\n");
+		}
+	}
+	else if (strcmp(cmd, "status") == 0) {
+		if (G_pGame != nullptr) {
+			int activeClients = 0;
+			for (int i = 1; i < DEF_MAXCLIENTS; i++) {
+				if (G_pGame->m_pClientList[i] != nullptr) activeClients++;
+			}
+			printf("\n=== Server Status ===\n");
+			printf("  Active clients: %d / %d\n", activeClients, DEF_MAXCLIENTS - 1);
+			printf("  Game started: %s\n", G_pGame->m_bIsGameStarted ? "Yes" : "No");
+			printf("=====================\n\n");
+		}
+	}
+	else if (strcmp(cmd, "quit") == 0 || strcmp(cmd, "exit") == 0) {
+		printf("\n[CONSOLE] Shutting down server...\n");
+		PostMessage(G_hWnd, WM_CLOSE, 0, 0);
+	}
+	else {
+		printf("[CONSOLE] Unknown command: '%s'. Type 'help' for available commands.\n", cmd);
+	}
+}
+
+void CheckConsoleInput()
+{
+	// Check if there's keyboard input available (non-blocking)
+	while (_kbhit()) {
+		int ch = _getch();
+		
+		if (ch == '\r' || ch == '\n') {
+			// Enter pressed - process command
+			g_cConsoleBuffer[g_iConsoleBufferPos] = '\0';
+			printf("\n");
+			ProcessConsoleCommand(g_cConsoleBuffer);
+			g_iConsoleBufferPos = 0;
+			g_cConsoleBuffer[0] = '\0';
+			printf("> ");
+		}
+		else if (ch == '\b' || ch == 127) {
+			// Backspace
+			if (g_iConsoleBufferPos > 0) {
+				g_iConsoleBufferPos--;
+				printf("\b \b");
+			}
+		}
+		else if (ch >= 32 && ch < 127 && g_iConsoleBufferPos < (int)sizeof(g_cConsoleBuffer) - 1) {
+			// Regular character
+			g_cConsoleBuffer[g_iConsoleBufferPos++] = (char)ch;
+			printf("%c", ch);
+		}
+	}
+}
+
 // MODERNIZED: Poll all sockets for network events
 // This function can be called from anywhere to keep sockets responsive during long operations
 void PollAllSockets()
@@ -611,6 +693,10 @@ int EventLoop()
 					dwLastDebug = dwNow;
 				}
 			}
+			
+			// Check for console input (non-blocking)
+			CheckConsoleInput();
+			
 			// Small sleep to prevent 100% CPU usage
 			Sleep(1);
 		}
@@ -650,6 +736,12 @@ void Initialize()
 
 	pLogFile = 0;
 	//pLogFile = fopen("test.log","wt+");
+	
+	// Show console command prompt
+	printf("\n=======================================================================\n");
+	printf("Server ready. Type 'help' for available console commands.\n");
+	printf("=======================================================================\n");
+	printf("> ");
 }
 
 void OnDestroy()
