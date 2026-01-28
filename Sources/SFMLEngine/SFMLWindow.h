@@ -64,6 +64,7 @@ private:
     int m_width;
     int m_height;
     bool m_fullscreen;
+    bool m_resizable;
     bool m_active;
     bool m_open;
 };

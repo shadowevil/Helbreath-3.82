@@ -61,7 +61,6 @@ public:
     virtual void OnMouseWheel(int delta) override;
 
 private:
-    void UpdateLogicalPosition(int clientX, int clientY);
     void UpdateCursorClip(bool active);
     void ClearAllKeys();
 

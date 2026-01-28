@@ -20,6 +20,7 @@ struct WindowParams
     int height;
     bool fullscreen;
     bool centered;
+    bool resizable;      // Allow window resizing (borderless with resize edges)
     HINSTANCE hInstance;
     int iconResourceId;  // 0 for default
 };
@@ -70,7 +71,9 @@ public:
     virtual ~IWindowEventHandler() = default;
 
     // ============== Window Events ==============
-    virtual void OnClose() = 0;
+    // OnClose: called when user requests window close (X button, ALT+F4)
+    // Return true to proceed with close, false to cancel (e.g., logout countdown)
+    virtual bool OnClose() = 0;
     virtual void OnDestroy() = 0;
     virtual void OnActivate(bool active) = 0;
     virtual void OnResize(int width, int height) = 0;
