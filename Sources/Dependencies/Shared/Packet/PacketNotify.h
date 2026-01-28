@@ -91,6 +91,13 @@ namespace net {
 		uint8_t padding[2];
 	};
 
+	// Hot reload: Update max lifespan of an item
+	struct HB_PACKED PacketNotifyMaxLifeSpan {
+		PacketHeader header;
+		int32_t item_index;
+		int32_t max_lifespan;
+	};
+
 	struct HB_PACKED PacketNotifyNpcHp {
 		PacketHeader header;
 		int32_t hp;

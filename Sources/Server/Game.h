@@ -788,6 +788,20 @@ public:
 	bool _bRegisterMap(char * pName);
 
 	class CClient * m_pClientList[DEF_MAXCLIENTS];
+
+	//============================================================================
+	// Hot Reload System (implementation in Game_HotReload.cpp)
+	//============================================================================
+	bool ReloadItemConfigs();
+	bool ReloadMagicConfigs();
+	bool ReloadSkillConfigs();
+	bool ReloadSettingsConfigs();
+	bool ReloadDropTables();
+	bool ReloadAllConfigs();
+	void UpdateExistingItemFromConfig(class CItem *pItem);
+	void UpdateAllExistingItems();
+	void BroadcastItemConfigsToAllClients();
+
 	class CNpc   ** m_pNpcList;  // Pointer to EntityManager's entity array (for backward compatibility)
 	class CMap    * m_pMapList[DEF_MAXMAPS];
 	class CNpcItem * m_pTempNpcItem[DEF_MAXNPCITEMS];

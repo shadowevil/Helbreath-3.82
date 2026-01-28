@@ -10,6 +10,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <windowsx.h>  // For GET_X_LPARAM, GET_Y_LPARAM
 #endif
 
 SFMLWindow::SFMLWindow()
@@ -18,6 +19,7 @@ SFMLWindow::SFMLWindow()
     , m_width(0)
     , m_height(0)
     , m_fullscreen(false)
+    , m_resizable(false)
     , m_active(true)
     , m_open(false)
 {
@@ -36,13 +38,28 @@ bool SFMLWindow::Create(const WindowParams& params)
     m_width = params.width;
     m_height = params.height;
     m_fullscreen = params.fullscreen;
+    m_resizable = params.resizable;
 
     // Create SFML window
     sf::VideoMode videoMode({static_cast<unsigned int>(m_width), static_cast<unsigned int>(m_height)});
 
-    sf::State state = params.fullscreen ? sf::State::Fullscreen : sf::State::Windowed;
-
-    m_renderWindow.create(videoMode, params.title ? params.title : "Window", sf::Style::None, state);
+    if (params.fullscreen)
+    {
+        // Fullscreen mode
+        m_renderWindow.create(videoMode, params.title ? params.title : "Window", 
+                              sf::Style::None, sf::State::Fullscreen);
+    }
+    else if (m_resizable)
+    {
+        // Windowed with standard decorations (title bar, min/max/close, resize)
+        m_renderWindow.create(videoMode, params.title ? params.title : "Window",
+                              sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
+    }
+    else
+    {
+        // Borderless window (original behavior)
+        m_renderWindow.create(videoMode, params.title ? params.title : "Window", sf::Style::None);
+    }
 
     if (!m_renderWindow.isOpen())
         return false;
@@ -56,9 +73,8 @@ bool SFMLWindow::Create(const WindowParams& params)
     m_renderWindow.setVerticalSyncEnabled(false);
 
     // Hide the system mouse cursor (game draws its own cursor)
-    // Also grab the cursor to ensure mouse events are tracked even when hidden
+    // Note: Do NOT use setMouseCursorGrabbed as it interferes with borderless resize
     m_renderWindow.setMouseCursorVisible(false);
-    m_renderWindow.setMouseCursorGrabbed(true);
 
     m_open = true;
     m_active = true;
@@ -87,10 +103,15 @@ bool SFMLWindow::IsOpen() const
 
 void SFMLWindow::Close()
 {
+    bool shouldClose = true;
     if (m_pEventHandler)
-        m_pEventHandler->OnClose();
-    m_open = false;
-    m_renderWindow.close();
+        shouldClose = m_pEventHandler->OnClose();
+    
+    if (shouldClose)
+    {
+        m_open = false;
+        m_renderWindow.close();
+    }
 }
 
 HWND SFMLWindow::GetHandle() const
@@ -245,10 +266,16 @@ bool SFMLWindow::ProcessMessages()
     {
         if (event->is<sf::Event::Closed>())
         {
+            bool shouldClose = true;
             if (m_pEventHandler)
-                m_pEventHandler->OnClose();
-            m_open = false;
-            return false;
+                shouldClose = m_pEventHandler->OnClose();
+            
+            if (shouldClose)
+            {
+                m_open = false;
+                return false;
+            }
+            continue;  // Close was cancelled, continue processing events
         }
 
         if (const auto* resized = event->getIf<sf::Event::Resized>())
@@ -364,10 +391,16 @@ void SFMLWindow::WaitForMessage()
         // Process the event we received (same logic as ProcessMessages)
         if (event->is<sf::Event::Closed>())
         {
+            bool shouldClose = true;
             if (m_pEventHandler)
-                m_pEventHandler->OnClose();
-            m_open = false;
-            return;
+                shouldClose = m_pEventHandler->OnClose();
+            
+            if (shouldClose)
+            {
+                m_open = false;
+                return;
+            }
+            // Close was cancelled, continue
         }
 
         if (const auto* focusGained = event->getIf<sf::Event::FocusGained>())

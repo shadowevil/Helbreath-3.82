@@ -206,55 +206,16 @@ int Win32Input::GetMouseY() const
 
 void Win32Input::OnMouseMove(int x, int y)
 {
-    UpdateLogicalPosition(x, y);
-}
-
-void Win32Input::UpdateLogicalPosition(int clientX, int clientY)
-{
-    if (!m_hWnd)
-    {
-        m_mouseX = clientX;
-        m_mouseY = clientY;
-        return;
-    }
-
-    RECT rcClient{};
-    GetClientRect(m_hWnd, &rcClient);
-    int winW = rcClient.right - rcClient.left;
-    int winH = rcClient.bottom - rcClient.top;
-    if (winW <= 0 || winH <= 0)
-        return;
-
-    // Calculate scale maintaining aspect ratio
-    double scale = static_cast<double>(winW) / static_cast<double>(LOGICAL_WIDTH);
-    double scaleY = static_cast<double>(winH) / static_cast<double>(LOGICAL_HEIGHT);
-    if (scaleY < scale)
-    {
-        scale = scaleY;
-    }
-    if (scale <= 0.0)
-    {
-        scale = 1.0;
-    }
-
-    // Calculate letterbox offset
-    int destW = static_cast<int>(LOGICAL_WIDTH * scale);
-    int destH = static_cast<int>(LOGICAL_HEIGHT * scale);
-    int offsetX = (winW - destW) / 2;
-    int offsetY = (winH - destH) / 2;
-
-    // Transform to logical coordinates
-    long scaledX = static_cast<long>((clientX - offsetX) / scale);
-    long scaledY = static_cast<long>((clientY - offsetY) / scale);
-
-    // Clamp to valid range
-    if (scaledX < 0) scaledX = 0;
-    if (scaledY < 0) scaledY = 0;
-    if (scaledX > LOGICAL_MAX_X) scaledX = LOGICAL_MAX_X;
-    if (scaledY > LOGICAL_MAX_Y) scaledY = LOGICAL_MAX_Y;
-
-    m_mouseX = static_cast<int>(scaledX);
-    m_mouseY = static_cast<int>(scaledY);
+    // Coordinates are already transformed to logical space (640x480) by the window layer
+    // Just store them directly - no additional transformation needed
+    m_mouseX = x;
+    m_mouseY = y;
+    
+    // Clamp to valid range (safety check)
+    if (m_mouseX < 0) m_mouseX = 0;
+    if (m_mouseY < 0) m_mouseY = 0;
+    if (m_mouseX > LOGICAL_MAX_X) m_mouseX = LOGICAL_MAX_X;
+    if (m_mouseY > LOGICAL_MAX_Y) m_mouseY = LOGICAL_MAX_Y;
 }
 
 // ============== Mouse Wheel ==============
@@ -332,41 +293,8 @@ void Win32Input::ClearAllKeys()
 
 void Win32Input::UpdateCursorClip(bool active)
 {
-    if (!m_hWnd)
-        return;
-
-    if (active)
-    {
-        RECT rcClient{};
-        GetClientRect(m_hWnd, &rcClient);
-        int winW = rcClient.right - rcClient.left;
-        int winH = rcClient.bottom - rcClient.top;
-
-        double scale = static_cast<double>(winW) / static_cast<double>(LOGICAL_WIDTH);
-        double scaleY = static_cast<double>(winH) / static_cast<double>(LOGICAL_HEIGHT);
-        if (scaleY < scale)
-        {
-            scale = scaleY;
-        }
-        if (scale <= 0.0)
-        {
-            scale = 1.0;
-        }
-
-        int destW = static_cast<int>(LOGICAL_WIDTH * scale);
-        int destH = static_cast<int>(LOGICAL_HEIGHT * scale);
-        int offsetX = (winW - destW) / 2;
-        int offsetY = (winH - destH) / 2;
-
-        POINT ptTopLeft{ offsetX, offsetY };
-        POINT ptBottomRight{ offsetX + destW, offsetY + destH };
-        ClientToScreen(m_hWnd, &ptTopLeft);
-        ClientToScreen(m_hWnd, &ptBottomRight);
-        RECT rcClip{ ptTopLeft.x, ptTopLeft.y, ptBottomRight.x, ptBottomRight.y };
-        ClipCursor(&rcClip);
-    }
-    else
-    {
-        ClipCursor(nullptr);
-    }
+    // Don't clip cursor - allow mouse to move freely like SFML does
+    // This lets users access window controls (minimize, maximize, close, resize)
+    (void)active;  // Unused
+    ClipCursor(nullptr);
 }

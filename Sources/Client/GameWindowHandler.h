@@ -19,7 +19,7 @@ public:
     // ============== IWindowEventHandler Implementation ==============
 
     // Window Events
-    virtual void OnClose() override;
+    virtual bool OnClose() override;
     virtual void OnDestroy() override;
     virtual void OnActivate(bool active) override;
     virtual void OnResize(int width, int height) override;

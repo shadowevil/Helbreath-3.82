@@ -48,6 +48,9 @@ private:
     // Internal WndProc - static to work with Win32 API
     static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
     LRESULT HandleMessage(UINT message, WPARAM wParam, LPARAM lParam);
+    
+    // Transform window coordinates to logical game coordinates (640x480)
+    void TransformMouseCoords(int windowX, int windowY, int& logicalX, int& logicalY) const;
 
     // Window state
     HWND m_hWnd;
@@ -56,6 +59,7 @@ private:
     int m_width;
     int m_height;
     bool m_fullscreen;
+    bool m_resizable;
     bool m_active;
     bool m_open;
     char m_className[64];

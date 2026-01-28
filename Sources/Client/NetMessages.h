@@ -212,6 +212,7 @@
  #define DEF_NOTIFY_QUESTABORTED					0x0B67
  #define DEF_NOTIFY_QUESTCOMPLETED					0x0B68 // Congratulations! You completed your quest!
  #define DEF_NOTIFY_QUESTREWARD						0x0B69
+ #define DEF_NOTIFY_MAXLIFESPAN						0x0B6A  // Hot reload: Update max lifespan
 
  #define DEF_NOTIFY_BUILDITEMSUCCESS				0x0B70 // Item manufacture success!
  #define DEF_NOTIFY_BUILDITEMFAIL					0x0B71 // Failed on manufacturing item.

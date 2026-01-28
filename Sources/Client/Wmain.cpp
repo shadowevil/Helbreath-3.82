@@ -101,6 +101,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     params.height = ConfigManager::Get().GetWindowHeight();
     params.fullscreen = false;
     params.centered = true;
+    params.resizable = true;  // Enable borderless resize
     params.hInstance = hInstance;
     params.iconResourceId = IDI_ICON1;
 
