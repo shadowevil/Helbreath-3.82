@@ -20,6 +20,34 @@ PORT = 8888
 DB_PATH = Path(__file__).parent / '../../Binaries/Server/GameConfigs.db'
 CHANGELOG_PATH = Path(__file__).parent / 'changelog.txt'
 
+# NPCs that don't have drop tables (guards, war units, special entities)
+IGNORED_NPCS = {
+    "AGT-Aresden", "AGT-Elvine",       # Town guards
+    "CGT-Aresden", "CGT-Elvine",       # City guards
+    "MS-Aresden", "MS-Elvine",         # Mages
+    "DT-Aresden", "DT-Elvine",         # Defense towers
+    "ESG-Aresden", "ESG-Elvine",       # Elite soldiers
+    "GMG-Aresden", "GMG-Elvine",       # Grand mages
+    "LWB-Aresden", "LWB-Elvine",       # Light war beetles
+    "XB-Aresden", "XB-Elvine",         # Summoned creatures
+    "XW-Aresden", "XW-Elvine",
+    "XY-Aresden", "XY-Elvine",
+    "YB-Aresden", "YB-Elvine",
+    "YW-Aresden", "YW-Elvine",
+    "YY-Aresden", "YY-Elvine",
+    "CP-Aresden", "CP-Elvine",         # Catapults
+    "Sor-Aresden", "Sor-Elvine",       # Sorcerers
+    "ATK-Aresden", "ATK-Evline",       # Attack units
+    "Elf-Aresden", "Elf-Elvine",       # Elf guards
+    "DSK-Aresden", "DSK-Elvine",       # Dark knights
+    "HBT-Aresden", "HBT-Elvine",       # Heldenian battle units
+    "CT-Aresden", "CT-Elvine",         # Combat troops
+    "Bar-Aresden", "Bar-Elvine",       # Barbarians
+    "AGC-Aresden", "AGC-Elvine",       # Archer guards
+    "ManaStone",                       # Mana stone (destructible object)
+    "GHK", "GHKABS", "TK", "BG"        # Special war NPCs
+}
+
 
 class ReuseAddrTCPServer(socketserver.TCPServer):
     allow_reuse_address = True
@@ -106,6 +134,9 @@ class DropManagerHandler(http.server.SimpleHTTPRequestHandler):
             name = row[1]
             if name.startswith('drops_'):
                 name = name[6:]  # Remove 'drops_' prefix
+            # Skip ignored NPCs (guards, war units, etc.)
+            if name in IGNORED_NPCS:
+                continue
             npcs.append({"id": row[0], "name": name, "description": row[2]})
         conn.close()
         return npcs

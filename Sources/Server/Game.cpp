@@ -1049,14 +1049,51 @@ bool CGame::bInit()
 	}
 
 	{
+		// NPCs that intentionally don't have drop tables (guards, war units, special entities)
+		static const char* noDropNpcs[] = {
+			"AGT-Aresden", "AGT-Elvine",       // Town guards
+			"CGT-Aresden", "CGT-Elvine",       // City guards
+			"MS-Aresden", "MS-Elvine",         // Mages
+			"DT-Aresden", "DT-Elvine",         // Defense towers
+			"ESG-Aresden", "ESG-Elvine",       // Elite soldiers
+			"GMG-Aresden", "GMG-Elvine",       // Grand mages
+			"LWB-Aresden", "LWB-Elvine",       // Light war beetles
+			"XB-Aresden", "XB-Elvine",         // Summoned creatures
+			"XW-Aresden", "XW-Elvine",
+			"XY-Aresden", "XY-Elvine",
+			"YB-Aresden", "YB-Elvine",
+			"YW-Aresden", "YW-Elvine",
+			"YY-Aresden", "YY-Elvine",
+			"CP-Aresden", "CP-Elvine",         // Catapults
+			"Sor-Aresden", "Sor-Elvine",       // Sorcerers
+			"ATK-Aresden", "ATK-Evline",       // Attack units
+			"Elf-Aresden", "Elf-Elvine",       // Elf guards
+			"DSK-Aresden", "DSK-Elvine",       // Dark knights
+			"HBT-Aresden", "HBT-Elvine",       // Heldenian battle units
+			"CT-Aresden", "CT-Elvine",         // Combat troops
+			"Bar-Aresden", "Bar-Elvine",       // Barbarians
+			"AGC-Aresden", "AGC-Elvine",       // Archer guards
+			"ManaStone",                       // Mana stone (destructible object)
+			"GHK", "GHKABS", "TK", "BG"        // Special war NPCs
+		};
+		static const int noDropNpcsCount = sizeof(noDropNpcs) / sizeof(noDropNpcs[0]);
+
 		int missingDrops = 0;
 		for (int i = 0; i < DEF_MAXNPCTYPES; i++) {
 			const CNpc* npc = m_pNpcConfigList[i];
 			if (npc == nullptr) {
 				continue;
 			}
+			bool shouldIgnore = false;
+			for (int j = 0; j < noDropNpcsCount; j++) {
+				if (strcmp(npc->m_cNpcName, noDropNpcs[j]) == 0) {
+					shouldIgnore = true;
+					break;
+				}
+			}
 			if (npc->m_iDropTableId == 0 &&
-				(npc->m_iExpDiceMax > 0 || npc->m_iGoldDiceMax > 0)) {
+				(npc->m_iExpDiceMax > 0 || npc->m_iGoldDiceMax > 0) &&
+				!shouldIgnore) {
 				char logMsg[256] = {};
 				std::snprintf(logMsg, sizeof(logMsg),
 					"NPC missing drop table: %s (exp %u-%u, gold %u-%u)",
