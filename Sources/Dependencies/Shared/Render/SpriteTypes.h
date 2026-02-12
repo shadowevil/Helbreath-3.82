@@ -7,9 +7,15 @@
 
 #include <cstdint>
 
+#ifdef _WIN32
 // Forward declare RECT to avoid including windows.h (causes macro pollution)
 struct tagRECT;
 typedef struct tagRECT RECT;
+#else
+// Provide RECT definition on non-Windows platforms
+struct tagRECT { long left, top, right, bottom; };
+typedef struct tagRECT RECT;
+#endif
 
 namespace hb::shared::sprite {
 

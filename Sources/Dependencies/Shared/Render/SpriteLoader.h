@@ -13,6 +13,10 @@
 #include <functional>
 #include <stdexcept>
 #include <memory>
+#ifndef _WIN32
+#include <filesystem>
+#include <algorithm>
+#endif
 
 namespace hb::shared::sprite {
 
@@ -31,7 +35,7 @@ public:
         }
 
         // Build full path using factory's configured sprite path
-        std::string pakPath = factory->GetSpritePath() + "\\" + pakName + ".pak";
+        std::string pakPath = _ResolvePath(factory->GetSpritePath() + "/" + pakName + ".pak");
 
         try {
             loader.m_pak = PAKLib::loadpak_fast(pakPath);
@@ -56,7 +60,7 @@ public:
             throw std::runtime_error("No sprite factory set");
         }
 
-        std::string pakPath = factory->GetSpritePath() + "\\" + pakName + ".pak";
+        std::string pakPath = _ResolvePath(factory->GetSpritePath() + "/" + pakName + ".pak");
 
         try {
             loader.m_pak = PAKLib::loadpak_fast(pakPath);
@@ -106,6 +110,31 @@ public:
 
 private:
     SpriteLoader() = default;
+
+    // On Linux, filenames are case-sensitive. This resolves the actual filename
+    // by scanning the directory for a case-insensitive match.
+    static std::string _ResolvePath(const std::string& path) {
+#ifndef _WIN32
+        namespace fs = std::filesystem;
+        fs::path p(path);
+        fs::path dir = p.parent_path();
+        std::string target = p.filename().string();
+
+        std::string targetLower = target;
+        std::transform(targetLower.begin(), targetLower.end(), targetLower.begin(), ::tolower);
+
+        std::error_code ec;
+        for (const auto& entry : fs::directory_iterator(dir, ec)) {
+            std::string name = entry.path().filename().string();
+            std::string nameLower = name;
+            std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+            if (nameLower == targetLower) {
+                return (dir / name).string();
+            }
+        }
+#endif
+        return path;
+    }
 
     bool m_isPakOpen = false;
     std::string m_pakName;

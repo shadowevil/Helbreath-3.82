@@ -5,6 +5,7 @@
 
 #include "SFMLSprite.h"
 #include "SFMLRenderer.h"
+#include "CommonTypes.h"
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
 
@@ -110,7 +111,7 @@ void SFMLSprite::Draw(int x, int y, int frame, const hb::shared::sprite::DrawPar
     }
 
     m_inUse = true;
-    m_lastAccessTime = GetTickCount();
+    m_lastAccessTime = GameClock::GetTimeMS();
 
     DrawInternal(m_pRenderer->GetBackBuffer(), x, y, frame, params);
 
@@ -133,7 +134,7 @@ void SFMLSprite::DrawToSurface(void* destSurface, int x, int y, int frame, const
     }
 
     m_inUse = true;
-    m_lastAccessTime = GetTickCount();
+    m_lastAccessTime = GameClock::GetTimeMS();
 
     sf::RenderTexture* target = static_cast<sf::RenderTexture*>(destSurface);
     DrawInternal(target, x, y, frame, params);
@@ -389,7 +390,7 @@ void SFMLSprite::DrawWidth(int x, int y, int frame, int width, bool vertical)
     }
 
     m_inUse = true;
-    m_lastAccessTime = GetTickCount();
+    m_lastAccessTime = GameClock::GetTimeMS();
 
     const PAKLib::sprite_rect& frameRect = m_frames[frame];
 

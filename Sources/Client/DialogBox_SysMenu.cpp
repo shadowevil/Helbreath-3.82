@@ -266,13 +266,22 @@ void DialogBox_SysMenu::DrawGeneralTab(short sX, short sY, short msX, short msY)
 	PutString(contentX + 6, contentY + 5, UPDATE_SCREEN_ON_SELECT_CHARACTER36, GameColors::UILabel);
 
 	// Current time centered below server name (MM/DD/YYYY HH:MM AM/PM)
-	SYSTEMTIME SysTime;
-	GetLocalTime(&SysTime);
 	std::string timeBuf;
-	int hour12 = SysTime.wHour % 12;
-	if (hour12 == 0) hour12 = 12;
-	const char* ampm = (SysTime.wHour < 12) ? "AM" : "PM";
-	timeBuf = std::format("{:02}/{:02}/{:04} {}:{:02} {}", SysTime.wMonth, SysTime.wDay, SysTime.wYear, hour12, SysTime.wMinute, ampm);
+	{
+		auto now = std::chrono::system_clock::now();
+		auto time_t_now = std::chrono::system_clock::to_time_t(now);
+		std::tm tm_now{};
+#ifdef _WIN32
+		localtime_s(&tm_now, &time_t_now);
+#else
+		localtime_r(&time_t_now, &tm_now);
+#endif
+		int hour12 = tm_now.tm_hour % 12;
+		if (hour12 == 0) hour12 = 12;
+		const char* ampm = (tm_now.tm_hour < 12) ? "AM" : "PM";
+		timeBuf = std::format("{:02}/{:02}/{:04} {}:{:02} {}",
+			tm_now.tm_mon + 1, tm_now.tm_mday, tm_now.tm_year + 1900, hour12, tm_now.tm_min, ampm);
+	}
 
 	int textWidth = hb::shared::text::GetTextRenderer()->MeasureText(timeBuf.c_str()).width;
 	int timeX = centerX - (textWidth / 2);
@@ -510,8 +519,8 @@ void DialogBox_SysMenu::DrawGraphicsTab(short sX, short sY, short msX, short msY
 
 	int resWidth, resHeight;
 	if (isFullscreen) {
-		resWidth = GetSystemMetrics(SM_CXSCREEN);
-		resHeight = GetSystemMetrics(SM_CYSCREEN);
+		resWidth = hb::shared::render::Window::Get()->GetWidth();
+		resHeight = hb::shared::render::Window::Get()->GetHeight();
 	}
 	else {
 		int resIndex = GetCurrentResolutionIndex();

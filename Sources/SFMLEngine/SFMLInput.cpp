@@ -37,7 +37,7 @@ namespace hb::shared::input {
 // ============== SFMLInput Implementation ==============
 
 SFMLInput::SFMLInput()
-    : m_hWnd(nullptr)
+    : m_hWnd(0)
     , m_pRenderWindow(nullptr)
     , m_active(false)
     , m_suppressed(false)

@@ -1,7 +1,6 @@
 #include "AccountSqliteStore.h"
 
-#include <windows.h>
-#include <direct.h>
+#include "Platform.h"
 #include <cstdio>
 #include <cctype>
 #include <cstring>
@@ -361,7 +360,7 @@ bool EnsureAccountDatabase(const char* accountName, sqlite3** outDb, std::string
     std::strncpy(lowerName, accountName, sizeof(lowerName) - 1);
     LowercaseInPlace(lowerName, sizeof(lowerName));
     char dbPath[MAX_PATH] = {};
-    std::snprintf(dbPath, sizeof(dbPath), "Accounts\\%s.db", lowerName);
+    std::snprintf(dbPath, sizeof(dbPath), "Accounts/%s.db", lowerName);
     outPath = dbPath;
 
     sqlite3* db = nullptr;
@@ -1959,7 +1958,7 @@ bool CharacterNameExistsGlobally(const char* characterName)
     }
 
     WIN32_FIND_DATA findData;
-    HANDLE hFind = FindFirstFile("Accounts\\*.db", &findData);
+    HANDLE hFind = FindFirstFile("Accounts/*.db", &findData);
 
     if (hFind == INVALID_HANDLE_VALUE) {
         // No account databases found
@@ -1976,7 +1975,7 @@ bool CharacterNameExistsGlobally(const char* characterName)
 
         // Build full path to database
         char dbPath[MAX_PATH] = {};
-        std::snprintf(dbPath, sizeof(dbPath), "Accounts\\%s", findData.cFileName);
+        std::snprintf(dbPath, sizeof(dbPath), "Accounts/%s", findData.cFileName);
 
         // Open the database
         sqlite3* db = nullptr;
@@ -2019,7 +2018,7 @@ bool AccountNameExists(const char* accountName)
     }
 
     WIN32_FIND_DATA findData;
-    HANDLE hFind = FindFirstFile("Accounts\\*.db", &findData);
+    HANDLE hFind = FindFirstFile("Accounts/*.db", &findData);
 
     if (hFind == INVALID_HANDLE_VALUE) {
         // No account databases found
@@ -2036,7 +2035,7 @@ bool AccountNameExists(const char* accountName)
 
         // Build full path to database
         char dbPath[MAX_PATH] = {};
-        std::snprintf(dbPath, sizeof(dbPath), "Accounts\\%s", findData.cFileName);
+        std::snprintf(dbPath, sizeof(dbPath), "Accounts/%s", findData.cFileName);
 
         // Open the database
         sqlite3* db = nullptr;
@@ -2126,7 +2125,7 @@ bool ResolveCharacterToAccount(const char* characterName, char* outAccountName, 
         return false;
 
     WIN32_FIND_DATA findData;
-    HANDLE hFind = FindFirstFile("Accounts\\*.db", &findData);
+    HANDLE hFind = FindFirstFile("Accounts/*.db", &findData);
 
     if (hFind == INVALID_HANDLE_VALUE)
         return false;
@@ -2138,7 +2137,7 @@ bool ResolveCharacterToAccount(const char* characterName, char* outAccountName, 
             continue;
 
         char dbPath[MAX_PATH] = {};
-        std::snprintf(dbPath, sizeof(dbPath), "Accounts\\%s", findData.cFileName);
+        std::snprintf(dbPath, sizeof(dbPath), "Accounts/%s", findData.cFileName);
 
         sqlite3* db = nullptr;
         if (sqlite3_open(dbPath, &db) != SQLITE_OK)

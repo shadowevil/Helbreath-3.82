@@ -4,7 +4,7 @@
 #include "DialogBoxIDs.h"
 #include <cstdio>
 #include <cstring>
-#include <windows.h>
+#include "PlatformCompat.h"
 #include <string>
 
 namespace NetworkMessageHandlers {

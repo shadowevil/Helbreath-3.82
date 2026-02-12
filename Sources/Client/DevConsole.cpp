@@ -14,12 +14,21 @@
 #include <cstdio>
 #include <cstdarg>
 #include <cstring>
+#include <format>
+#include <string>
 
 #ifdef _WIN32
 #include <windows.h>
 #include <psapi.h>
-#include <format>
-#include <string>
+#else
+#include <strings.h>  // strcasecmp
+#endif
+
+// Cross-platform compat shims
+#ifndef _WIN32
+#define sprintf_s(buf, ...) snprintf(buf, sizeof(buf), __VA_ARGS__)
+#define strncpy_s(dst, src, count) do { strncpy(dst, src, count); dst[count] = '\0'; } while(0)
+#define _stricmp strcasecmp
 #endif
 
 // ============== Singleton ==============
@@ -187,7 +196,7 @@ bool DevConsole::HandleChar(unsigned int codepoint)
 		return true;
 
 	// Normal character
-	if (c >= 32 && m_iInputLen < MAX_INPUT - 1)
+	if (c >= 32 && m_iInputLen < CONSOLE_MAX_INPUT - 1)
 	{
 		m_szInput[m_iInputLen++] = c;
 		m_szInput[m_iInputLen] = '\0';
@@ -242,15 +251,15 @@ void DevConsole::ExecuteCommand()
 	// Add to history
 	if (m_iHistoryCount < MAX_HISTORY)
 	{
-		strncpy_s(m_szHistory[m_iHistoryCount], m_szInput, MAX_INPUT - 1);
+		strncpy_s(m_szHistory[m_iHistoryCount], m_szInput, CONSOLE_MAX_INPUT - 1);
 		m_iHistoryCount++;
 	}
 	else
 	{
 		// Shift history up
 		for (int i = 0; i < MAX_HISTORY - 1; i++)
-			memcpy(m_szHistory[i], m_szHistory[i + 1], MAX_INPUT);
-		strncpy_s(m_szHistory[MAX_HISTORY - 1], m_szInput, MAX_INPUT - 1);
+			memcpy(m_szHistory[i], m_szHistory[i + 1], CONSOLE_MAX_INPUT);
+		strncpy_s(m_szHistory[MAX_HISTORY - 1], m_szInput, CONSOLE_MAX_INPUT - 1);
 	}
 	m_iHistoryIndex = -1;
 
@@ -311,7 +320,7 @@ void DevConsole::HistoryUp()
 	else if (m_iHistoryIndex > 0)
 		m_iHistoryIndex--;
 
-	strncpy_s(m_szInput, m_szHistory[m_iHistoryIndex], MAX_INPUT - 1);
+	strncpy_s(m_szInput, m_szHistory[m_iHistoryIndex], CONSOLE_MAX_INPUT - 1);
 	m_iInputLen = static_cast<int>(strlen(m_szInput));
 }
 
@@ -322,7 +331,7 @@ void DevConsole::HistoryDown()
 	if (m_iHistoryIndex < m_iHistoryCount - 1)
 	{
 		m_iHistoryIndex++;
-		strncpy_s(m_szInput, m_szHistory[m_iHistoryIndex], MAX_INPUT - 1);
+		strncpy_s(m_szInput, m_szHistory[m_iHistoryIndex], CONSOLE_MAX_INPUT - 1);
 		m_iInputLen = static_cast<int>(strlen(m_szInput));
 	}
 	else

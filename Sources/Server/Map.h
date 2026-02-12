@@ -4,7 +4,7 @@
 
 // MODERNIZED: Prevent old winsock.h from loading (must be before windows.h)
 
-#include <windows.h>
+#include "Platform.h"
 #include "CommonTypes.h"
 #include "NetConstants.h"
 #include "OccupyFlag.h"
@@ -35,7 +35,7 @@ constexpr int MaxHeldenianTower     = 200;
 
 // MODERNIZED: Prevent old winsock.h from loading (must be before windows.h)
 
-#include <windows.h>
+#include "Platform.h"
 #include "CommonTypes.h"
 #include "Game.h"
 #include "TeleportLoc.h"

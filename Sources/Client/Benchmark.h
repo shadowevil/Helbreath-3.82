@@ -107,11 +107,11 @@ public:
 };
 
 // Static member initialization
-__declspec(selectany) bool DebugConsole::s_bAllocated = false;
-__declspec(selectany) FILE* DebugConsole::s_pOut = nullptr;
-__declspec(selectany) FILE* DebugConsole::s_pErr = nullptr;
+inline bool DebugConsole::s_bAllocated = false;
+inline FILE* DebugConsole::s_pOut = nullptr;
+inline FILE* DebugConsole::s_pErr = nullptr;
 #ifdef _WIN32
-__declspec(selectany) SIZE_T DebugConsole::s_lastWorkingSet = 0;
+inline SIZE_T DebugConsole::s_lastWorkingSet = 0;
 #endif
 
 // ============================================================================

@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "Platform.h"
 #include "CmdBroadcast.h"
 #include "Game.h"
 #include "winmain.h"

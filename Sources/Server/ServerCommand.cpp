@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "Platform.h"
 #include "ServerCommand.h"
 #include "CmdHelp.h"
 #include "CmdShowChat.h"

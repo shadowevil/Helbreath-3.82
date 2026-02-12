@@ -1,5 +1,5 @@
-﻿#pragma once
-#include <windows.h>
+#pragma once
+#include "PlatformCompat.h"
 #include <cstdint>
 #include <cstring>
 #include <string>

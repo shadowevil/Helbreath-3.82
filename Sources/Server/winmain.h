@@ -2,11 +2,9 @@
 
 #pragma once
 
+#include "Platform.h"
 #include "CommonTypes.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#include <mmsystem.h>
 // Log levels
 #define LOG_LEVEL_INFO 0
 #define LOG_LEVEL_NOTICE 1
@@ -36,4 +34,3 @@ void _StopTimer(MMRESULT timerid);
 // Extern declarations for async networking globals
 namespace hb::shared::net { class IOServicePool; }
 extern hb::shared::net::IOServicePool* G_pIOPool;
-#endif

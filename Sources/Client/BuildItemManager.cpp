@@ -26,7 +26,7 @@ bool BuildItemManager::LoadRecipes()
 			m_recipes[i].reset();
 	}
 
-	std::ifstream file("contents\\\\BItemcfg.txt");
+	std::ifstream file("contents/BItemcfg.txt");
 	if (!file) return false;
 
 	std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());

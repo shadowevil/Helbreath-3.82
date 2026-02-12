@@ -1,7 +1,9 @@
-#include <windows.h>
+#include "Platform.h"
 #include "CmdShowChat.h"
 #include "winmain.h"
 #include <cstdio>
+
+#ifdef _WIN32
 
 void CmdShowChat::Execute(CGame* pGame, const char* pArgs)
 {
@@ -18,7 +20,7 @@ void CmdShowChat::Execute(CGame* pGame, const char* pArgs)
 	}
 
 	char szLogPath[MAX_PATH];
-	GetFullPathNameA("GameLogs\\Chat.log", MAX_PATH, szLogPath, nullptr);
+	GetFullPathNameA("GameLogs/Chat.log", MAX_PATH, szLogPath, nullptr);
 
 	char szCmdLine[1024];
 	std::snprintf(szCmdLine, sizeof(szCmdLine),
@@ -55,3 +57,41 @@ void CmdShowChat::Execute(CGame* pGame, const char* pArgs)
 		PutLogList(szError);
 	}
 }
+
+#else
+
+#include <sys/wait.h>
+
+void CmdShowChat::Execute(CGame* pGame, const char* pArgs)
+{
+	if (m_pid > 0)
+	{
+		int status = 0;
+		pid_t result = waitpid(m_pid, &status, WNOHANG);
+		if (result == 0)
+		{
+			PutLogList((char*)"(!) Chat viewer is already open.");
+			return;
+		}
+		m_pid = -1;
+	}
+
+	pid_t pid = fork();
+	if (pid < 0)
+	{
+		PutLogList((char*)"(!) Failed to fork chat viewer process.");
+		return;
+	}
+
+	if (pid == 0)
+	{
+		// Child process — exec tail -f
+		execlp("tail", "tail", "-f", "GameLogs/Chat.log", (char*)nullptr);
+		_exit(127);
+	}
+
+	m_pid = pid;
+	PutLogList((char*)"(!) Chat viewer started (tail -f GameLogs/Chat.log).");
+}
+
+#endif

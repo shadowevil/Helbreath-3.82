@@ -34,18 +34,24 @@ SFMLTextRenderer::SFMLTextRenderer(sf::RenderTexture* backBuffer)
 
 bool SFMLTextRenderer::LoadDefaultFont()
 {
-    // Fallback to Windows system fonts if client didn't load a font
     const char* defaultFonts[] = {
+#ifdef _WIN32
         "C:\\Windows\\Fonts\\tahoma.ttf",
         "C:\\Windows\\Fonts\\arial.ttf",
-        "C:\\Windows\\Fonts\\segoeui.ttf"
+        "C:\\Windows\\Fonts\\segoeui.ttf",
+#else
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans.ttf",
+        "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf",
+#endif
     };
 
     for (const char* path : defaultFonts)
     {
         if (m_font.openFromFile(path))
         {
-            // Disable texture smoothing for pixel-perfect rendering to match DDraw
             m_font.setSmooth(false);
             m_fontLoaded = true;
             return true;
@@ -76,22 +82,32 @@ bool SFMLTextRenderer::LoadFontByName(const char* fontName)
     if (!fontName)
         return false;
 
-    // Try to find the font in Windows Fonts folder
-    std::string fontPath = "C:\\Windows\\Fonts\\";
-    fontPath += fontName;
+    // Platform-specific font directories
+    const char* fontDirs[] = {
+#ifdef _WIN32
+        "C:\\Windows\\Fonts\\",
+#else
+        "/usr/share/fonts/truetype/",
+        "/usr/share/fonts/TTF/",
+        "/usr/share/fonts/truetype/dejavu/",
+        "/usr/share/fonts/truetype/msttcorefonts/",
+        "/usr/share/fonts/",
+#endif
+    };
 
-    // Try with common extensions
     const char* extensions[] = { ".ttf", ".otf", ".TTF", ".OTF", "" };
 
-    for (const char* ext : extensions)
+    for (const char* dir : fontDirs)
     {
-        std::string fullPath = fontPath + ext;
-        if (m_font.openFromFile(fullPath))
+        for (const char* ext : extensions)
         {
-            // Disable texture smoothing for pixel-perfect rendering to match DDraw
-            m_font.setSmooth(false);
-            m_fontLoaded = true;
-            return true;
+            std::string fullPath = std::string(dir) + fontName + ext;
+            if (m_font.openFromFile(fullPath))
+            {
+                m_font.setSmooth(false);
+                m_fontLoaded = true;
+                return true;
+            }
         }
     }
 

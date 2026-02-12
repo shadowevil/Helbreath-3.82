@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "Platform.h"
 #include "GameCmdWhisper.h"
 #include "Game.h"
 #include <cstring>

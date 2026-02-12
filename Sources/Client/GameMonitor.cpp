@@ -32,13 +32,15 @@ int CGameMonitor::iReadBadWordFileList(char* pFn)
 	char seps[] = "/,\t\n";
 	char cReadMode = 0;
 	int  iIndex = 0;
-	HANDLE hFile;
 	FILE* pFile;
 	uint32_t dwFileSize;
 
-	hFile = CreateFile(pFn, GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
-	dwFileSize = GetFileSize(hFile, 0);
-	if (hFile != INVALID_HANDLE_VALUE) CloseHandle(hFile);
+	// Get file size using standard C
+	pFile = fopen(pFn, "rb");
+	if (!pFile) return 0;
+	fseek(pFile, 0, SEEK_END);
+	dwFileSize = static_cast<uint32_t>(ftell(pFile));
+	fclose(pFile);
 
 	pFile = fopen(pFn, "rt");
 	if (pFile == 0) return 0;

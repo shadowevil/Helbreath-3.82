@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <windows.h>
+#include "PlatformCompat.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "GlobalDef.h"

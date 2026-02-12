@@ -3,9 +3,6 @@
 #include "CommonTypes.h"
 #include "Game.h"
 #include "AdminLevel.h"
-#ifdef _WIN32
-#include <direct.h>
-#endif
 #include "LoginServer.h"
 #include "EntityManager.h"
 #include "FishingManager.h"
@@ -486,7 +483,7 @@ bool CGame::bAccept(class hb::shared::net::ASIOSocket* pXSock)
 				std::memset(cIPtoBan, 0, sizeof(cIPtoBan));
 				strcpy(cIPtoBan, m_pClientList[i]->m_cIPaddress);
 				//opens cfg file
-				pFile = fopen("GameConfigs\\BannedList.cfg", "a");
+				pFile = fopen("GameConfigs/BannedList.cfg", "a");
 				//shows log
 				std::snprintf(G_cTxt, sizeof(G_cTxt), "<%d> IP Banned: (%s)", i, cIPtoBan);
 				PutLogList(G_cTxt);
@@ -596,7 +593,7 @@ bool CGame::bAcceptFromAsync(asio::ip::tcp::socket&& peer)
 			if (iTotalip > 9) {
 				std::memset(cIPtoBan, 0, sizeof(cIPtoBan));
 				strcpy(cIPtoBan, m_pClientList[i]->m_cIPaddress);
-				pFile = fopen("GameConfigs\\BannedList.cfg", "a");
+				pFile = fopen("GameConfigs/BannedList.cfg", "a");
 				std::snprintf(G_cTxt, sizeof(G_cTxt), "<%d> IP Banned: (%s)", i, cIPtoBan);
 				PutLogList(G_cTxt);
 				fprintf(pFile, "banned-ip = %s", cIPtoBan);
@@ -1049,7 +1046,7 @@ bool CGame::bInit()
 		m_cDayOrNight = 2;
 	else m_cDayOrNight = 1;
 
-	bReadNotifyMsgListFile("GameConfigs\\notice.txt");
+	bReadNotifyMsgListFile("GameConfigs/notice.txt");
 	m_dwNoticeTime = dwTime;
 
 	m_pNoticementData = 0;
@@ -4368,7 +4365,7 @@ void CGame::InitPlayerData(int iClientH, char* pData, uint32_t dwSize)
 	if (strcmp(m_pClientList[iClientH]->m_cGuildName, "NONE") != 0) {
 		char cFn[112] = {};
 		std::memset(cFn, 0, sizeof(cFn));
-		std::snprintf(cFn, sizeof(cFn), "Guilds\\AscII%d\\%s.txt", m_pClientList[iClientH]->m_cGuildName[0], m_pClientList[iClientH]->m_cGuildName);
+		std::snprintf(cFn, sizeof(cFn), "Guilds/AscII%d/%s.txt", m_pClientList[iClientH]->m_cGuildName[0], m_pClientList[iClientH]->m_cGuildName);
 		HANDLE  hFile = CreateFile(cFn, GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
 		auto dwFileSize = GetFileSize(hFile, 0);
 
@@ -5242,7 +5239,6 @@ char _tmp_cEmptyPosY[] = { 0, 0, 1, 1, 1, 0, -1, -1, -1, -1, 0, 1, 2, 2, 2, 2, 2
 
 bool CGame::bGetEmptyPosition(short* pX, short* pY, char cMapIndex)
 {
-	
 	short sX, sY;
 
 	for(int i = 0; i < 25; i++)
@@ -5254,7 +5250,6 @@ bool CGame::bGetEmptyPosition(short* pX, short* pY, char cMapIndex)
 			*pY = sY;
 			return true;
 		}
-
 
 	GetMapInitialPoint(cMapIndex, &sX, &sY);
 	*pX = sX;
@@ -10467,7 +10462,7 @@ void CGame::RequestNoticementHandler(int iClientH)
 
 	if (m_pClientList[iClientH] == 0) return;
 
-	HANDLE hFile = CreateFile("GameConfigs\\Noticement.txt", GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
+	HANDLE hFile = CreateFile("GameConfigs/Noticement.txt", GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
 	uint32_t dwFileSize = GetFileSize(hFile, 0);
 	if (dwFileSize == -1) {
 		return;
@@ -11874,9 +11869,9 @@ void CGame::OnStartGameSignal()
 		CloseGameConfigDatabase(configDb);
 	}
 
-	m_pWarManager->bReadCrusadeGUIDFile("GameData\\CrusadeGUID.txt");
-	m_pWarManager->bReadApocalypseGUIDFile("GameData\\ApocalypseGUID.txt");
-	m_pWarManager->bReadHeldenianGUIDFile("GameData\\HeldenianGUID.txt");
+	m_pWarManager->bReadCrusadeGUIDFile("GameData/CrusadeGUID.txt");
+	m_pWarManager->bReadApocalypseGUIDFile("GameData/ApocalypseGUID.txt");
+	m_pWarManager->bReadHeldenianGUIDFile("GameData/HeldenianGUID.txt");
 
 	PutLogList("(!) Game Server Activated.");
 

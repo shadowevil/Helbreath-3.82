@@ -1,0 +1,9 @@
+{
+  "name": "helbreath-client",
+  "version-string": "3.82.0",
+  "description": "Helbreath MMORPG Client",
+  "dependencies": [
+    "sfml",
+    "nlohmann-json"
+  ]
+}

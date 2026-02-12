@@ -1,6 +1,6 @@
 #include "MapInfoSqliteStore.h"
 
-#include <windows.h>
+#include "Platform.h"
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -79,7 +79,8 @@ bool EnsureMapInfoDatabase(sqlite3** outDb, std::string& outPath, bool* outCreat
 		char modulePath[MAX_PATH] = {};
 		DWORD len = GetModuleFileNameA(nullptr, modulePath, MAX_PATH);
 		if (len > 0 && len < MAX_PATH) {
-			char* lastSlash = strrchr(modulePath, '\\');
+			char* lastSlash = strrchr(modulePath, '/');
+			if (!lastSlash) lastSlash = strrchr(modulePath, '\\');
 			if (lastSlash != nullptr) {
 				*(lastSlash + 1) = '\0';
 				dbPath.assign(modulePath);

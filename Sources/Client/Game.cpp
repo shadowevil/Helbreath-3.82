@@ -270,7 +270,7 @@ bool CGame::bInit()
 	// Preload the default font for text rendering
 	if (hb::shared::text::GetTextRenderer())
 	{
-		if (!hb::shared::text::GetTextRenderer()->LoadFontFromFile("FONTS/default.ttf"))
+		if (!hb::shared::text::GetTextRenderer()->LoadFontFromFile("fonts/default.ttf"))
 		{
 			printf("[FONT] Failed to load default.ttf font file!\n");
 		}
@@ -2453,14 +2453,11 @@ void CGame::AddEventList(const char* pTxt, char cColor, bool bDupAllow)
 
 bool CGame::bCheckImportantFile()
 {
-	HANDLE hFile;
-
 	// Use the sprite factory's configured path
-	std::string spritePath = hb::shared::sprite::Sprites::GetSpritePath() + "\\TREES1.PAK";
-	hFile = CreateFile(spritePath.c_str(), GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
-	if (hFile == INVALID_HANDLE_VALUE) return false;
-
-	CloseHandle(hFile);
+	std::string spritePath = hb::shared::sprite::Sprites::GetSpritePath() + "/TREES1.PAK";
+	FILE* f = fopen(spritePath.c_str(), "rb");
+	if (!f) return false;
+	fclose(f);
 	return true;
 }
 
@@ -3704,7 +3701,7 @@ void CGame::_LoadTextDlgContents(int cType)
 			m_pMsgTextList[i].reset();
 	}
 
-	std::string fileName = std::format("contents\\\\contents{}.txt", cType);
+	std::string fileName = std::format("contents/contents{}.txt", cType);
 
 	std::ifstream file(fileName);
 	if (!file) return;
@@ -3729,7 +3726,7 @@ int CGame::_iLoadTextDlgContents2(int iType)
 			m_pMsgTextList2[i].reset();
 	}
 
-	std::string fileName = std::format("contents\\\\contents{}.txt", iType);
+	std::string fileName = std::format("contents/contents{}.txt", iType);
 
 	std::ifstream file(fileName);
 	if (!file) return -1;
@@ -3755,7 +3752,7 @@ void CGame::_LoadGameMsgTextContents()
 			m_pGameMsgList[i].reset();
 	}
 
-	std::ifstream file("contents\\\\GameMsgList.txt");
+	std::ifstream file("contents/GameMsgList.txt");
 	if (!file) return;
 
 	std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -4473,7 +4470,7 @@ void CGame::NoticementHandler(char* pData)
 			pData, sizeof(hb::net::PacketResponseNoticementText));
 		if (!pkt) return;
 		{
-			std::ofstream file("contents\\contents1000.txt");
+			std::ofstream file("contents/contents1000.txt");
 			if (!file) return;
 			file << pkt->text;
 		}
@@ -4538,7 +4535,11 @@ void CGame::CreateScreenShot()
 	auto now = std::chrono::system_clock::now();
 	auto time = std::chrono::system_clock::to_time_t(now);
 	std::tm tm{};
+#ifdef _WIN32
 	localtime_s(&tm, &time);
+#else
+	localtime_r(&time, &tm);
+#endif
 
 	std::string timeStr = std::format("{:02d}:{:02d} - {:02d}:{:02d}:{:02d}",
 		tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
@@ -4546,11 +4547,11 @@ void CGame::CreateScreenShot()
 		hb::shared::text::TextStyle::Color(GameColors::UIWhite),
 		hb::shared::text::Align::TopCenter);
 
-	std::filesystem::create_directory("SAVE");
+	std::filesystem::create_directory("save");
 
 	for (int i = 0; i < 1000; i++)
 	{
-		std::string fileName = std::format("Save\\HelShot{:04d}{:02d}{:02d}_{:02d}{:02d}{:02d}_{}{:03d}.png",
+		std::string fileName = std::format("save/HelShot{:04d}{:02d}{:02d}_{:02d}{:02d}{:02d}_{}{:03d}.png",
 			tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
 			tm.tm_hour, tm.tm_min, tm.tm_sec,
 			longMapName, i);
@@ -7519,7 +7520,6 @@ void CGame::InitDataResponseHandler(char* packet_data)
 
 	char map_filename[32]{};
 	bool is_observer = false;
-	HANDLE file_handle = INVALID_HANDLE_VALUE;
 	uint32_t file_size = 0;
 
 	m_pPlayer->m_bParalyze = false;
@@ -7639,11 +7639,11 @@ void CGame::InitDataResponseHandler(char* packet_data)
 	}
 
 	std::memset(map_filename, 0, sizeof(map_filename));
-	std::snprintf(map_filename + strlen(map_filename), sizeof(map_filename) - strlen(map_filename), "%s", "mapdata\\");
+	std::snprintf(map_filename + strlen(map_filename), sizeof(map_filename) - strlen(map_filename), "%s", "mapdata/");
 	// CLEROTH - MW MAPS
 	if (m_cMapName.starts_with("defaultmw"))
 	{
-		std::snprintf(map_filename + strlen(map_filename), sizeof(map_filename) - strlen(map_filename), "%s", "mw\\defaultmw");
+		std::snprintf(map_filename + strlen(map_filename), sizeof(map_filename) - strlen(map_filename), "%s", "mw/defaultmw");
 	}
 	else
 	{
@@ -7702,13 +7702,15 @@ void CGame::InitDataResponseHandler(char* packet_data)
 	if (m_bIsFirstConn == true)
 	{
 		m_bIsFirstConn = false;
-		file_handle = CreateFile("contents\\contents1000.txt", GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
-		if (file_handle == INVALID_HANDLE_VALUE)
-			file_size = 0;
-		else
+		file_size = 0;
 		{
-			file_size = GetFileSize(file_handle, 0);
-			CloseHandle(file_handle);
+			FILE* f = fopen("contents/contents1000.txt", "rb");
+			if (f)
+			{
+				fseek(f, 0, SEEK_END);
+				file_size = static_cast<uint32_t>(ftell(f));
+				fclose(f);
+			}
 		}
 		bSendCommand(MsgId::RequestNoticement, 0, 0, static_cast<int>(file_size), 0, 0, 0);
 	}

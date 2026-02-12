@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "Platform.h"
 #include "CmdReload.h"
 #include "Game.h"
 #include "SkillManager.h"

@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "Platform.h"
 #include "CmdGiveItem.h"
 #include "Game.h"
 #include "ItemManager.h"

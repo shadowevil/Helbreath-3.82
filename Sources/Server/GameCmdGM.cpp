@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "Platform.h"
 #include "GameCmdGM.h"
 #include "Game.h"
 #include <cstring>

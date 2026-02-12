@@ -4,10 +4,8 @@
 
 // MODERNIZED: Prevent old winsock.h from loading (must be before windows.h)
 
-#include <windows.h>
+#include "Platform.h"
 #include "CommonTypes.h"
-#include <winbase.h>
-#include <process.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

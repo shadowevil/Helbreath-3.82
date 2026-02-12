@@ -3,11 +3,8 @@
 
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
-
-#ifdef _WIN32
-#include <direct.h>
-#endif
 
 LocalCacheManager& LocalCacheManager::Get()
 {
@@ -17,9 +14,7 @@ LocalCacheManager& LocalCacheManager::Get()
 
 void LocalCacheManager::Initialize()
 {
-#ifdef _WIN32
-	_mkdir("CACHE");
-#endif
+	std::filesystem::create_directory("cache");
 	for (int i = 0; i < static_cast<int>(ConfigCacheType::COUNT); i++) {
 		m_state[i] = {};
 		m_accum[i] = {};
@@ -158,10 +153,10 @@ void LocalCacheManager::ResetAccumulator(ConfigCacheType type)
 const char* LocalCacheManager::_GetFilename(ConfigCacheType type) const
 {
 	switch (type) {
-	case ConfigCacheType::Items:  return "CACHE\\{7A3F8B2E-4D1C-9E5A-B6F0-2C8D4E1A3B5F}.bin";
-	case ConfigCacheType::Magic:  return "CACHE\\{D9E2A1C4-8F37-4B6D-A5C0-1E9F3D7B2A4C}.bin";
-	case ConfigCacheType::Skills: return "CACHE\\{B4C8E6F1-2A5D-4739-8E1B-6F0C3D9A5E2B}.bin";
-	case ConfigCacheType::Npcs:   return "CACHE\\{E3A7F5D2-1B8C-4E6A-9D0F-5C2B7A4E8F1D}.bin";
+	case ConfigCacheType::Items:  return "cache/{7A3F8B2E-4D1C-9E5A-B6F0-2C8D4E1A3B5F}.bin";
+	case ConfigCacheType::Magic:  return "cache/{D9E2A1C4-8F37-4B6D-A5C0-1E9F3D7B2A4C}.bin";
+	case ConfigCacheType::Skills: return "cache/{B4C8E6F1-2A5D-4739-8E1B-6F0C3D9A5E2B}.bin";
+	case ConfigCacheType::Npcs:   return "cache/{E3A7F5D2-1B8C-4E6A-9D0F-5C2B7A4E8F1D}.bin";
 	default: return "";
 	}
 }

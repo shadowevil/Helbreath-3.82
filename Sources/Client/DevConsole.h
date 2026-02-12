@@ -73,13 +73,13 @@ private:
 	int m_iScrollOffset = 0;
 
 	// Input
-	static constexpr int MAX_INPUT = 256;
-	char m_szInput[MAX_INPUT]{};
+	static constexpr int CONSOLE_MAX_INPUT = 256;
+	char m_szInput[CONSOLE_MAX_INPUT]{};
 	int m_iInputLen = 0;
 
 	// Command history
 	static constexpr int MAX_HISTORY = 32;
-	char m_szHistory[MAX_HISTORY][MAX_INPUT]{};
+	char m_szHistory[MAX_HISTORY][CONSOLE_MAX_INPUT]{};
 	int m_iHistoryCount = 0;
 	int m_iHistoryIndex = -1;
 

@@ -8,7 +8,7 @@
 #include "DialogBoxIDs.h"
 #include <cstdio>
 #include <cstring>
-#include <windows.h>
+#include "PlatformCompat.h"
 
 void FishingManager::HandleFishChance(char* pData)
 {

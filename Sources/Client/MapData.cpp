@@ -850,19 +850,16 @@ CMapData::~CMapData()
 
 void CMapData::OpenMapDataFile(char* cFn)
 {
-	HANDLE hFileRead;
-	DWORD nCount;
 	char cHeader[260];
 	char* cp, * cpMapData;
 	std::memset(cHeader, 0, sizeof(cHeader));
-	hFileRead = CreateFile(cFn, GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
-	if (hFileRead == INVALID_HANDLE_VALUE) return;
-	SetFilePointer(hFileRead, 0, 0, FILE_BEGIN);
-	ReadFile(hFileRead, cHeader, 256, &nCount, 0);
+	FILE* f = fopen(cFn, "rb");
+	if (!f) return;
+	fread(cHeader, 1, 256, f);
 	_bDecodeMapInfo(cHeader);
 	cpMapData = new char[m_sMapSizeX * m_sMapSizeY * 10];
-	ReadFile(hFileRead, cpMapData, m_sMapSizeX * m_sMapSizeY * 10, &nCount, 0);
-	CloseHandle(hFileRead);
+	fread(cpMapData, 1, m_sMapSizeX * m_sMapSizeY * 10, f);
+	fclose(f);
 	cp = cpMapData;
 	for (int y = 0; y < m_sMapSizeY; y++)
 	{

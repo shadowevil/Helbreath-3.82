@@ -4,10 +4,7 @@
 #include "GuildManager.h"
 #include "Game.h"
 #include "Packet/SharedPackets.h"
-#ifdef _WIN32
-#include <direct.h>
-#endif
-#include <windows.h>
+#include "Platform.h"
 #include <cstdio>
 #include <cstring>
 
@@ -483,20 +480,16 @@ void GuildManager::RequestCreateNewGuild(int iClientH, char* pData)
 	std::memcpy(cGuildLocation, guildData.location, sizeof(guildData.location));
 	dwGuildGUID = guildData.guild_guid;
 
-	strcat(cFileName, "Guilds");
-	strcat(cFileName, "\\");
+	strcat(cFileName, "Guilds/");
 	std::snprintf(cTxt2, sizeof(cTxt2), "AscII%d", *cGuildName);
 	strcat(cFileName, cTxt2);
 	strcat(cDir, cFileName);
-	strcat(cFileName, "\\");
-	strcat(cFileName, "\\");
+	strcat(cFileName, "/");
 	strcat(cFileName, cGuildName);
 	strcat(cFileName, ".txt");
 
-#ifdef _WIN32
 	_mkdir("Guilds");
 	_mkdir(cDir);
-#endif
 
 	pFile = fopen(cFileName, "rt");
 	if (pFile != 0) {
@@ -570,14 +563,11 @@ void GuildManager::RequestDisbandGuild(int iClientH, char* pData)
 	std::memcpy(cGuildMasterName, disbandData.char_name, sizeof(disbandData.char_name));
 	std::memcpy(cGuildName, disbandData.guild_name, sizeof(disbandData.guild_name));
 
-	strcat(cFileName, "Guilds");
-	strcat(cFileName, "\\");
-	strcat(cFileName, "\\");
+	strcat(cFileName, "Guilds/");
 	std::snprintf(cTxt, sizeof(cTxt), "AscII%d", *cGuildName);
 	strcat(cFileName, cTxt);
 	strcat(cDir, cFileName);
-	strcat(cFileName, "\\");
-	strcat(cFileName, "\\");
+	strcat(cFileName, "/");
 	strcat(cFileName, cGuildName);
 	strcat(cFileName, ".txt");
 

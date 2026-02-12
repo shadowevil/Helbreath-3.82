@@ -1,35 +1,22 @@
-// -------------------------------------------------------------- 
-//                      New Game Server  						  
+// --------------------------------------------------------------
+//                      New Game Server
 //
 //                      1998.11 by Soph
 //
 // --------------------------------------------------------------
 
 
-
-
-
-
-
 // --------------------------------------------------------------
 
-
-#ifdef _WIN32
-// MODERNIZED: Prevent old winsock.h from loading (must be before windows.h)
-
-#include <windows.h>
+#include "Platform.h"
 #include "CommonTypes.h"
-#include <windowsx.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <winbase.h>
-#include <mmsystem.h>
 #include <time.h>
 #include <cstring>
 #include "winmain.h"
 #include "Game.h"
 #include "UserMessages.h"
-// #include "resource.h" - REMOVED: No resources needed for console mode
 #include "LoginServer.h"
 #include "ServerConsole.h"
 #include "ServerCommand.h"
@@ -38,6 +25,11 @@
 #include "GameChatCommand.h"
 #include "IOServicePool.h"
 #include "ConcurrentMsgQueue.h"
+
+#ifndef _WIN32
+#include <signal.h>
+#endif
+
 using namespace hb::server::config;
 
 void PutHackLogFileList(char* cStr);
@@ -49,8 +41,6 @@ void PutPvPLogFileList(char* cStr);
 
 char			szAppClass[32];
 HWND			G_hWnd = 0;
-// G_cMsgList - REMOVED: No longer needed for console output
-// G_cMsgUpdated - REMOVED: No longer needed for console output
 char            G_cTxt[512];
 char			G_cData50000[50000];
 MMRESULT        G_mmTimer = 0;
@@ -77,8 +67,17 @@ bool			G_bIsThread = true;
 
 FILE* pLogFile;
 
-//char			G_cCrashTxt[50000];
 // --------------------------------------------------------------
+
+#ifndef _WIN32
+static volatile sig_atomic_t g_shutdownRequested = 0;
+
+static void SignalHandler(int sig)
+{
+	(void)sig;
+	g_shutdownRequested = 1;
+}
+#endif
 
 unsigned __stdcall ThreadProc(void* ch)
 {
@@ -113,36 +112,24 @@ unsigned __stdcall ThreadProc(void* ch)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
-	// WM_CREATE - REMOVED: No initialization needed
-	// WM_KEYDOWN - REMOVED: No keyboard input for console mode
-	// WM_KEYUP - REMOVED: No keyboard input for console mode
-	// WM_PAINT - REMOVED: No GDI rendering for console mode
-
 	case WM_USER_STARTGAMESIGNAL:
 		G_pGame->OnStartGameSignal();
 		break;
 
 	case WM_USER_TIMERSIGNAL:
-		// MODERNIZED: Game logic moved to EventLoop to prevent blocking socket polling
-		// OnTimer still called for other timer-based events (if any)
 		G_pGame->OnTimer(0);
 		break;
-
-	// MODERNIZED: Removed WM_USER_ACCEPT and WM_USER_ACCEPT_LOGIN handlers
-	// Listen sockets are now polled directly in OnTimer() instead of using window messages
 
 	case WM_DESTROY:
 		OnDestroy();
 		break;
 
 	case WM_CLOSE:
-		// Simple shutdown without MessageBox
 		if (G_pGame->bOnClose())
 			return (DefWindowProc(hWnd, message, wParam, lParam));
 		break;
 
 	default:
-		// Handle sub log socket events
 		if ((message >= WM_USER_BOT_ACCEPT + 1) && (message <= WM_USER_BOT_ACCEPT + MaxClientLoginSock))
 			G_pGame->OnSubLogSocketEvent(message, wParam, lParam);
 
@@ -154,10 +141,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 int main()
 {
+#ifndef _WIN32
+	signal(SIGINT, SignalHandler);
+	signal(SIGTERM, SignalHandler);
+#endif
+
 	HINSTANCE hInstance = GetModuleHandle(0);
 	int nCmdShow = SW_SHOW;
-	// Install SEH
-	// SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)lpTopLevelExceptionFilter);
 	sprintf(szAppClass, "GameServer%p", static_cast<void*>(hInstance));
 	if (!InitApplication(hInstance))		return (false);
 	if (!InitInstance(hInstance, nCmdShow)) return (false);
@@ -167,10 +157,12 @@ int main()
 	return 0;
 }
 
+#ifdef _WIN32
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	return main();
 }
+#endif
 
 
 
@@ -219,9 +211,11 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow)
 	AllocConsole();
 	SetConsoleTitle(cTitle);
 
-	// Redirect stdout/stderr to console
+#ifdef _WIN32
+	// Redirect stdout/stderr to console (Windows only — Linux stdout already works)
 	freopen("CONOUT$", "w", stdout);
 	freopen("CONOUT$", "w", stderr);
+#endif
 
 	// Print startup banner
 	printf("\n");
@@ -262,9 +256,6 @@ void DrainErrorQueue()
 
 	hb::shared::net::SocketErrorEvent evt;
 	while (G_errorQueue.Pop(evt)) {
-		// Determine if this is a game client or login client
-		// Game clients have positive indices 1..MaxClients-1
-		// Login clients have negative indices (-1 to -MaxClientLoginSock)
 		if (evt.iSocketIndex > 0 && evt.iSocketIndex < MaxClients) {
 			if (G_pGame->m_pClientList[evt.iSocketIndex] != nullptr) {
 				std::snprintf(G_cTxt, sizeof(G_cTxt),
@@ -277,7 +268,6 @@ void DrainErrorQueue()
 			}
 		}
 		else if (evt.iSocketIndex < 0) {
-			// Login client: index is -(loginClientH + 1)
 			int loginH = -(evt.iSocketIndex + 1);
 			if (loginH >= 0 && loginH < MaxClientLoginSock) {
 				G_pGame->DeleteLoginClient(loginH);
@@ -299,7 +289,6 @@ void PollLoginClients()
 }
 
 // Legacy PollAllSockets - called from EntityManager during NPC processing
-// With async I/O, this drains queues and polls login clients
 void PollAllSockets()
 {
 	DrainAcceptQueues();
@@ -312,9 +301,16 @@ WPARAM EventLoop()
 	static unsigned short _usCnt = 0;
 	static uint32_t dwLastDebug = 0;
 	static uint32_t dwLastGameProcess = 0;
+	static uint32_t dwLastTimerTick = 0;
 	MSG msg;
 
 	while (true) {
+#ifndef _WIN32
+		if (g_shutdownRequested) {
+			OnDestroy();
+			return 0;
+		}
+#endif
 		if (PeekMessage(&msg, 0, 0, 0, PM_NOREMOVE)) {
 			if (!GetMessage(&msg, 0, 0, 0)) {
 				return msg.wParam;
@@ -323,31 +319,32 @@ WPARAM EventLoop()
 			DispatchMessage(&msg);
 		}
 		else {
-			// MODERNIZED: Poll sockets and run game logic continuously without blocking
 			if (G_pGame != nullptr) {
 				uint32_t dwNow = GameClock::GetTimeMS();
 
-				// Run game logic every 300ms (same as old timer)
-				// GameProcess calls NpcProcess which now polls sockets during entity processing
 				if (dwNow - dwLastGameProcess >= (300/ hb::server::config::GameTickMultiplier)) {
 					G_pGame->GameProcess();
 					dwLastGameProcess = dwNow;
 				}
 
-				// Drain async accept and error queues from I/O threads
+#ifndef _WIN32
+				// On Linux, the multimedia timer doesn't exist.
+				// Call OnTimer at the same interval to handle game startup and periodic events.
+				if (dwNow - dwLastTimerTick >= (300 / hb::server::config::GameTickMultiplier)) {
+					G_pGame->OnTimer(0);
+					dwLastTimerTick = dwNow;
+				}
+#endif
+
 				DrainAcceptQueues();
 				DrainErrorQueue();
-
-				// Poll login client sockets (still use polling for login protocol)
 				PollLoginClients();
 
-				// Poll console for command input
 				char szCmd[256];
 				if (GetServerConsole().PollInput(szCmd, sizeof(szCmd))) {
 					ServerCommandManager::Get().ProcessCommand(szCmd);
 				}
 
-				// Debug: Show polling stats every 60 seconds (optional, can be removed)
 				if (dwNow - dwLastDebug > 60000) {
 					int activeClients = 0;
 					int activeLoginClients = 0;
@@ -360,7 +357,6 @@ WPARAM EventLoop()
 					dwLastDebug = dwNow;
 				}
 			}
-			// Small sleep to prevent 100% CPU usage
 			Sleep(1);
 		}
 	}
@@ -386,7 +382,6 @@ void Initialize()
 	GameChatCommandManager::Get().Initialize(G_pGame);
 	GetServerConsole().Init();
 
-	// ���� ����� Ÿ�̸�
 	G_mmTimer = _StartTimer((300 / hb::server::config::GameTickMultiplier));
 
 	G_pListenSock = new class hb::shared::net::ASIOSocket(G_pIOPool->GetContext(), ServerSocketBlockLimit);
@@ -407,7 +402,6 @@ void Initialize()
 	G_pIOPool->Start();
 
 	pLogFile = 0;
-	//pLogFile = fopen("test.log","wt+");
 }
 
 void OnDestroy()
@@ -539,7 +533,7 @@ namespace
 			return;
 		}
 		CreateDirectoryA("GameLogs", nullptr);
-		FILE* file = fopen("GameLogs\\server.log", "at");
+		FILE* file = fopen("GameLogs/server.log", "at");
 		if (file == nullptr) {
 			return;
 		}
@@ -604,22 +598,8 @@ void PutLogList(char* cMsg)
 
 void PutXSocketLogList(char* cMsg)
 {
-	// char cTemp[120*50];
-
-		//G_cMsgUpdated = true;
-		//std::memset(cTemp, 0, sizeof(cTemp));
-		//memcpy((cTemp + 120), G_cMsgList, 120*49);
-		//memcpy(cTemp, cMsg, strlen(cMsg));
-		//memcpy(G_cMsgList, cTemp, 120*50);
 	PutXSocketLogFileList(cMsg);
-
 }
-
-// UpdateScreen() - REMOVED: No longer needed for console output
-
-// OnPaint() - REMOVED: No longer needed for console output
-
-
 
 void  OnKeyUp(WPARAM wParam, LPARAM lParam)
 {
@@ -676,9 +656,7 @@ void PutLogFileList(char* cStr)
 	char cBuffer[512];
 	SYSTEMTIME SysTime;
 
-	// Original:
-	// pFile = fopen("Events.log", "at");
-	pFile = fopen("GameLogs\\Events.log", "at");
+	pFile = fopen("GameLogs/Events.log", "at");
 	if (pFile == 0) return;
 	std::memset(cBuffer, 0, sizeof(cBuffer));
 	GetLocalTime(&SysTime);
@@ -695,7 +673,7 @@ void PutHackLogFileList(char* cStr)
 	char cBuffer[512];
 	SYSTEMTIME SysTime;
 
-	pFile = fopen("GameLogs\\HackEvents.log", "at");
+	pFile = fopen("GameLogs/HackEvents.log", "at");
 	if (pFile == 0) return;
 
 	std::memset(cBuffer, 0, sizeof(cBuffer));
@@ -715,7 +693,7 @@ void PutPvPLogFileList(char* cStr)
 	char cBuffer[512];
 	SYSTEMTIME SysTime;
 
-	pFile = fopen("GameLogs\\PvPEvents.log", "at");
+	pFile = fopen("GameLogs/PvPEvents.log", "at");
 	if (pFile == 0) return;
 
 	std::memset(cBuffer, 0, sizeof(cBuffer));
@@ -735,7 +713,7 @@ void PutXSocketLogFileList(char* cStr)
 	char cBuffer[512];
 	SYSTEMTIME SysTime;
 
-	pFile = fopen("GameLogs\\XSocket.log", "at");
+	pFile = fopen("GameLogs/XSocket.log", "at");
 	if (pFile == 0) return;
 
 	std::memset(cBuffer, 0, sizeof(cBuffer));
@@ -755,7 +733,7 @@ void PutLogEventFileList(char* cStr)
 	char cBuffer[512];
 	SYSTEMTIME SysTime;
 
-	pFile = fopen("GameLogs\\LogEvents.log", "at");
+	pFile = fopen("GameLogs/LogEvents.log", "at");
 	if (pFile == 0) return;
 
 	std::memset(cBuffer, 0, sizeof(cBuffer));
@@ -768,9 +746,3 @@ void PutLogEventFileList(char* cStr)
 	fwrite(cBuffer, 1, strlen(cBuffer), pFile);
 	fclose(pFile);
 }
-#else
-int main()
-{
-	return 0;
-}
-#endif

@@ -13,6 +13,20 @@
 #include "Overlay_DevConsole.h"
 #include "GameModeManager.h"
 
+#ifndef _WIN32
+// Win32 message constants - only used in OnCustomMessage/OnTextInput
+// which are only called from Win32 message pump code
+#define WM_CHAR           0x0102
+#define WM_SETCURSOR      0x0020
+#define WM_SETFOCUS       0x0007
+#define WM_KILLFOCUS      0x0008
+#define WM_LBUTTONDBLCLK  0x0203
+typedef intptr_t LPARAM;
+#define GET_X_LPARAM(lp) ((int)(short)(lp & 0xFFFF))
+#define GET_Y_LPARAM(lp) ((int)(short)((lp >> 16) & 0xFFFF))
+namespace MouseButton = hb::shared::input::MouseButton;
+#endif
+
 #ifdef _WIN32
 #include <windowsx.h>
 

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <windows.h>
-#include <bcrypt.h>
+#include "Platform.h"
+#include <openssl/evp.h>
+#include <openssl/rand.h>
 #include <cstdio>
 #include <cstring>
 
@@ -35,8 +36,7 @@ constexpr int HashHexLen = 65;  // 32 bytes = 64 hex chars + null
 		if (outSize < SaltHexLen) return false;
 
 		unsigned char saltBytes[16] = {};
-		NTSTATUS status = BCryptGenRandom(nullptr, saltBytes, sizeof(saltBytes), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
-		if (status != 0) return false;
+		if (RAND_bytes(saltBytes, sizeof(saltBytes)) != 1) return false;
 
 		std::memset(outSaltHex, 0, outSize);
 		BytesToHex(saltBytes, sizeof(saltBytes), outSaltHex, outSize);
@@ -52,32 +52,18 @@ constexpr int HashHexLen = 65;  // 32 bytes = 64 hex chars + null
 		std::snprintf(input, sizeof(input), "%s%s", saltHex, password);
 		size_t inputLen = std::strlen(input);
 
-		BCRYPT_ALG_HANDLE hAlg = nullptr;
-		BCRYPT_HASH_HANDLE hHash = nullptr;
 		unsigned char hashResult[32] = {};
-		bool ok = false;
+		unsigned int hashLen = 0;
 
-		NTSTATUS status = BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_SHA256_ALGORITHM, nullptr, 0);
-		if (status != 0) goto cleanup;
-
-		status = BCryptCreateHash(hAlg, &hHash, nullptr, 0, nullptr, 0, 0);
-		if (status != 0) goto cleanup;
-
-		status = BCryptHashData(hHash, reinterpret_cast<PUCHAR>(input), static_cast<ULONG>(inputLen), 0);
-		if (status != 0) goto cleanup;
-
-		status = BCryptFinishHash(hHash, hashResult, sizeof(hashResult), 0);
-		if (status != 0) goto cleanup;
+		if (EVP_Digest(input, inputLen, hashResult, &hashLen, EVP_sha256(), nullptr) != 1) {
+			OPENSSL_cleanse(input, sizeof(input));
+			return false;
+		}
 
 		std::memset(outHashHex, 0, outSize);
 		BytesToHex(hashResult, sizeof(hashResult), outHashHex, outSize);
-		ok = true;
-
-	cleanup:
-		if (hHash) BCryptDestroyHash(hHash);
-		if (hAlg) BCryptCloseAlgorithmProvider(hAlg, 0);
-		SecureZeroMemory(input, sizeof(input));
-		return ok;
+		OPENSSL_cleanse(input, sizeof(input));
+		return true;
 	}
 
 	inline bool VerifyPassword(const char* password, const char* saltHex, const char* storedHashHex)

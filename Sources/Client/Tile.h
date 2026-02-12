@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include <windows.h>
-#include <mmsystem.h>
+#include "PlatformCompat.h"
 #include "EntityMotion.h"
 #include "AnimationState.h"
 #include <string>

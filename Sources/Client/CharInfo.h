@@ -5,7 +5,7 @@
 #pragma once
 #include <string>
 
-#include <windows.h>
+#include "PlatformCompat.h"
 #include "Appearance.h"
 
 class CCharInfo

@@ -1,7 +1,6 @@
 #include "WarManager.h"
 #include "Game.h"
 #include "StatusEffectManager.h"
-#include <direct.h>
 #include "Item.h"
 #include "CombatManager.h"
 #include "EntityManager.h"
@@ -436,15 +435,11 @@ void WarManager::_CreateCrusadeGUID(uint32_t dwCrusadeGUID, int iWinnerSide)
 	char* cp, cTxt[256], cFn[256], cTemp[1024];
 	FILE* pFile;
 
-#ifdef _WIN32
 	_mkdir("GameData");
-#endif
 	std::memset(cFn, 0, sizeof(cFn));
 
-	strcat(cFn, "GameData");
-	strcat(cFn, "\\");
-	strcat(cFn, "\\");
-	strcat(cFn, "CrusadeGUID.Txt");
+	strcat(cFn, "GameData/");
+	strcat(cFn, "CrusadeGUID.txt");
 
 	pFile = fopen(cFn, "wt");
 	if (pFile == 0) {
@@ -1800,15 +1795,11 @@ void WarManager::_CreateHeldenianGUID(uint32_t dwHeldenianGUID, int iWinnerSide)
 	char* cp, cTxt[256], cFn[256], cTemp[1024];
 	FILE* pFile;
 
-#ifdef _WIN32
 	_mkdir("GameData");
-#endif
 	std::memset(cFn, 0, sizeof(cFn));
 
-	strcat(cFn, "GameData");
-	strcat(cFn, "\\");
-	strcat(cFn, "\\");
-	strcat(cFn, "HeldenianGUID.Txt");
+	strcat(cFn, "GameData/");
+	strcat(cFn, "HeldenianGUID.txt");
 
 	pFile = fopen(cFn, "wt");
 	if (pFile == 0) {
@@ -2288,15 +2279,11 @@ void WarManager::_CreateApocalypseGUID(uint32_t dwApocalypseGUID)
 	char* cp, cTxt[256], cFn[256], cTemp[1024];
 	FILE* pFile;
 
-#ifdef _WIN32
 	_mkdir("GameData");
-#endif
 	std::memset(cFn, 0, sizeof(cFn));
 
-	strcat(cFn, "GameData");
-	strcat(cFn, "\\");
-	strcat(cFn, "\\");
-	strcat(cFn, "ApocalypseGUID.Txt");
+	strcat(cFn, "GameData/");
+	strcat(cFn, "ApocalypseGUID.txt");
 
 	pFile = fopen(cFn, "wt");
 	if (pFile == 0) {

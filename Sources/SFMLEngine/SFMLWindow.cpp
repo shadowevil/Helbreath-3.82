@@ -12,13 +12,12 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#endif
 
 namespace MouseButton = hb::shared::input::MouseButton;
 
-#endif
-
 SFMLWindow::SFMLWindow()
-    : m_hWnd(nullptr)
+    : m_hWnd(0)
     , m_pEventHandler(nullptr)
     , m_width(0)
     , m_height(0)
@@ -116,7 +115,7 @@ void SFMLWindow::Destroy()
     timeEndPeriod(1);
 #endif
 
-    m_hWnd = nullptr;
+    m_hWnd = 0;
     m_open = false;
     m_active = false;
 }
@@ -174,8 +173,8 @@ void SFMLWindow::SetFullscreen(bool fullscreen)
         // Save windowed dimensions before going fullscreen
         m_windowedWidth = m_width;
         m_windowedHeight = m_height;
-        windowWidth = GetSystemMetrics(SM_CXSCREEN);
-        windowHeight = GetSystemMetrics(SM_CYSCREEN);
+        windowWidth = static_cast<int>(sf::VideoMode::getDesktopMode().size.x);
+        windowHeight = static_cast<int>(sf::VideoMode::getDesktopMode().size.y);
     }
     else
     {
@@ -224,11 +223,15 @@ void SFMLWindow::SetFullscreen(bool fullscreen)
     // If switching to windowed mode, center the window
     if (!fullscreen)
     {
-        int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-        int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+        int screenWidth = static_cast<int>(sf::VideoMode::getDesktopMode().size.x);
+        int screenHeight = static_cast<int>(sf::VideoMode::getDesktopMode().size.y);
         int newX = (screenWidth - windowWidth) / 2;
         int newY = (screenHeight - windowHeight) / 2;
+#ifdef _WIN32
         SetWindowPos(m_hWnd, HWND_TOP, newX, newY, windowWidth, windowHeight, SWP_SHOWWINDOW);
+#else
+        m_renderWindow.setPosition(sf::Vector2i(newX, newY));
+#endif
     }
 }
 
@@ -265,11 +268,17 @@ void SFMLWindow::SetBorderless(bool borderless)
     m_renderWindow.setMouseCursorGrabbed(m_bMouseCaptureEnabled);
 
     // Center the window
-    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-    int posX = (screenWidth - m_width) / 2;
-    int posY = (screenHeight - m_height) / 2;
-    SetWindowPos(m_hWnd, HWND_TOP, posX, posY, m_width, m_height, SWP_SHOWWINDOW);
+    {
+        int screenWidth = static_cast<int>(sf::VideoMode::getDesktopMode().size.x);
+        int screenHeight = static_cast<int>(sf::VideoMode::getDesktopMode().size.y);
+        int posX = (screenWidth - m_width) / 2;
+        int posY = (screenHeight - m_height) / 2;
+#ifdef _WIN32
+        SetWindowPos(m_hWnd, HWND_TOP, posX, posY, m_width, m_height, SWP_SHOWWINDOW);
+#else
+        m_renderWindow.setPosition(sf::Vector2i(posX, posY));
+#endif
+    }
 
     // Update input system with new window handle
     if (hb::shared::input::Get())
@@ -303,23 +312,27 @@ void SFMLWindow::SetSize(int width, int height, bool center)
     // Update the SFML window size
     m_renderWindow.setSize({static_cast<unsigned int>(width), static_cast<unsigned int>(height)});
 
-    // Update Win32 window position/size
-    if (m_hWnd)
+    // Update window position/size
+    if (center)
     {
-        int posX = 0, posY = 0;
-        if (center)
-        {
-            int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-            int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-            posX = (screenWidth - width) / 2;
-            posY = (screenHeight - height) / 2;
+        int screenWidth = static_cast<int>(sf::VideoMode::getDesktopMode().size.x);
+        int screenHeight = static_cast<int>(sf::VideoMode::getDesktopMode().size.y);
+        int posX = (screenWidth - width) / 2;
+        int posY = (screenHeight - height) / 2;
+#ifdef _WIN32
+        if (m_hWnd)
             SetWindowPos(m_hWnd, HWND_TOP, posX, posY, width, height, SWP_SHOWWINDOW);
-        }
-        else
-        {
-            // Just resize, keep position
+#else
+        m_renderWindow.setPosition(sf::Vector2i(posX, posY));
+#endif
+    }
+    else
+    {
+#ifdef _WIN32
+        // Just resize, keep position
+        if (m_hWnd)
             SetWindowPos(m_hWnd, HWND_TOP, 0, 0, width, height, SWP_NOMOVE | SWP_SHOWWINDOW);
-        }
+#endif
     }
 
     // Re-apply mouse cursor grab to update grab boundaries to new window size
@@ -331,12 +344,14 @@ void SFMLWindow::Show()
 {
     m_renderWindow.setVisible(true);
     m_renderWindow.requestFocus();
+#ifdef _WIN32
     // On Windows, also force foreground window to ensure focus
     if (m_hWnd)
     {
         SetForegroundWindow(m_hWnd);
         SetFocus(m_hWnd);
     }
+#endif
 }
 
 void SFMLWindow::Hide()

@@ -470,7 +470,7 @@ bool CMap::_bDecodeMapDataFileContents()
 	class CTile* pTile;
 
 	std::memset(cMapFileName, 0, sizeof(cMapFileName));
-	strcat(cMapFileName, "mapdata\\");
+	strcat(cMapFileName, "mapdata/");
 	strcat(cMapFileName, m_cName);
 	strcat(cMapFileName, ".amd");
 

@@ -69,7 +69,7 @@ bool AccountDbExists(const char* accountName)
 	std::strncpy(lower, accountName, hb::shared::limits::AccountNameLen - 1);
 	LowercaseInPlace(lower, sizeof(lower));
 	char dbPath[MAX_PATH] = {};
-	std::snprintf(dbPath, sizeof(dbPath), "Accounts\\%s.db", lower);
+	std::snprintf(dbPath, sizeof(dbPath), "Accounts/%s.db", lower);
 	DWORD attrs = GetFileAttributes(dbPath);
 	return (attrs != INVALID_FILE_ATTRIBUTES) && ((attrs & FILE_ATTRIBUTE_DIRECTORY) == 0);
 }

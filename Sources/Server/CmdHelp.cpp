@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "Platform.h"
 #include "CmdHelp.h"
 #include "winmain.h"
 #include <cstdio>

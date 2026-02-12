@@ -11,6 +11,23 @@
 #include <cstdio>
 #include <algorithm>
 
+#ifndef _WIN32
+// strncpy_s / _TRUNCATE shim for Linux builds
+#ifndef _TRUNCATE
+#define _TRUNCATE ((size_t)-1)
+inline int strncpy_s(char* dst, size_t dstSize, const char* src, size_t count)
+{
+    if (!dst || dstSize == 0) return 22;
+    if (!src) { dst[0] = '\0'; return 22; }
+    if (count == _TRUNCATE || count >= dstSize)
+        count = dstSize - 1;
+    strncpy(dst, src, count);
+    dst[count] = '\0';
+    return 0;
+}
+#endif
+#endif
+
 namespace hb::shared::net {
 
 namespace sock = socket;
@@ -737,9 +754,12 @@ int ASIOSocket::DrainToQueue()
 			return iPacketsQueued;
 
 		case sock::Event::SocketError:
-		case sock::Event::SocketClosed:
 		case sock::Event::MsgSizeTooLarge:
 			return -1;
+		case sock::Event::SocketClosed:
+			// If we already queued packets before the close, return them
+			// so the caller can process the response before handling disconnect.
+			return (iPacketsQueued > 0) ? iPacketsQueued : -1;
 
 		case sock::Event::OnRead:
 			break;

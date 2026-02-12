@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <windows.h>
+#include "PlatformCompat.h"
 
 class CTileSpr
 {

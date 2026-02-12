@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "Platform.h"
 #include "GameCmdGoto.h"
 #include "Game.h"
 #include "AccountSqliteStore.h"

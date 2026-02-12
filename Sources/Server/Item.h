@@ -9,7 +9,7 @@
 
 // MODERNIZED: Prevent old winsock.h from loading (must be before windows.h)
 
-#include <windows.h>
+#include "Platform.h"
 #include "CommonTypes.h"
 
 // Include unified shared Item system

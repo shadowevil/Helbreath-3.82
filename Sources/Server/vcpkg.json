@@ -1,0 +1,7 @@
+{
+    "name": "helbreath-server",
+    "version-string": "3.82",
+    "dependencies": [
+        "openssl"
+    ]
+}

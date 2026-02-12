@@ -6,6 +6,10 @@
 #include "SFMLSpriteFactory.h"
 #include "SFMLSprite.h"
 #include "SFMLRenderer.h"
+#ifndef _WIN32
+#include <filesystem>
+#include <algorithm>
+#endif
 
 SFMLSpriteFactory::SFMLSpriteFactory(SFMLRenderer* pRenderer)
     : m_pRenderer(pRenderer)
@@ -102,6 +106,26 @@ std::string SFMLSpriteFactory::BuildPakPath(const std::string& pakName) const
     }
     path += pakName;
     path += ".pak";
+
+#ifndef _WIN32
+    // Linux is case-sensitive; resolve actual filename from directory
+    namespace fs = std::filesystem;
+    fs::path p(path);
+    fs::path dir = p.parent_path();
+    std::string target = p.filename().string();
+    std::string targetLower = target;
+    std::transform(targetLower.begin(), targetLower.end(), targetLower.begin(), ::tolower);
+
+    std::error_code ec;
+    for (const auto& entry : fs::directory_iterator(dir, ec)) {
+        std::string name = entry.path().filename().string();
+        std::string nameLower = name;
+        std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+        if (nameLower == targetLower) {
+            return (dir / name).string();
+        }
+    }
+#endif
 
     return path;
 }

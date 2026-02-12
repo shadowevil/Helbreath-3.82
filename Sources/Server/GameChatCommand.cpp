@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "Platform.h"
 #include "GameChatCommand.h"
 #include "GameCmdWhisper.h"
 #include "GameCmdBlock.h"
@@ -98,7 +98,7 @@ void GameChatCommandManager::LogCommand(int iClientH, const char* pCommand)
 	if (m_pGame == nullptr || m_pGame->m_pClientList[iClientH] == nullptr)
 		return;
 
-	FILE* pFile = fopen("GameLogs\\Commands.log", "a");
+	FILE* pFile = fopen("GameLogs/Commands.log", "a");
 	if (pFile == nullptr)
 		return;
 

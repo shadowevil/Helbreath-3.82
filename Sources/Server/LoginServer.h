@@ -1,7 +1,7 @@
 #pragma once
 // MODERNIZED: Prevent old winsock.h from loading (must be before windows.h)
 
-#include <windows.h>
+#include "Platform.h"
 #include "CommonTypes.h"
 #include <iostream>
 #include <vector>
