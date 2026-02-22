@@ -115,10 +115,10 @@ namespace hb::shared::owner {
 	inline bool is_always_invisible(short t) { return t == EnergySphere || t == Abaddon; }
 
 	// Returns true for entity types that can receive items from players.
-	// Players (give/exchange), ShopKeeper/Tom (sell/repair), Howard (bank deposit).
+	// Players (give/exchange), ShopKeeper/Tom (sell/repair), Howard (bank deposit), Kennedy (guild tickets).
 	inline bool can_receive_items(short t)
 	{
-		return is_player(t) || t == ShopKeeper || t == Tom || t == Howard;
+		return is_player(t) || t == ShopKeeper || t == Tom || t == Howard || t == Kennedy;
 	}
 
 } // namespace hb::shared::owner

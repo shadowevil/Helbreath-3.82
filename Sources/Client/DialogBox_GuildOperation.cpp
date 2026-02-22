@@ -40,7 +40,7 @@ void DialogBox_GuildOperation::draw_join_request(short sX, short sY, short mouse
 {
 	put_aligned_string(sX + 24, sX + 248, sY + 50, DRAW_DIALOGBOX_GUILD_OPERATION1);
 	put_aligned_string(sX + 24, sX + 248, sY + 65, m_game->m_guild_op_list[0].name.c_str(), GameColors::UILabel);
-	put_aligned_string(sX + 24, sX + 248, sY + 69, "____________________", GameColors::UIBlack);
+	put_aligned_string(sX + 24, sX + 248, sY + 78, "____________________", GameColors::UIBlack);
 	put_aligned_string(sX + 24, sX + 248, sY + 90, DRAW_DIALOGBOX_GUILD_OPERATION2);
 	put_aligned_string(sX + 24, sX + 248, sY + 105, DRAW_DIALOGBOX_GUILD_OPERATION3);
 	put_aligned_string(sX + 24, sX + 248, sY + 120, DRAW_DIALOGBOX_GUILD_OPERATION4);
@@ -59,7 +59,7 @@ void DialogBox_GuildOperation::draw_dismiss_request(short sX, short sY, short mo
 {
 	put_aligned_string(sX + 24, sX + 248, sY + 50, DRAW_DIALOGBOX_GUILD_OPERATION6);
 	put_aligned_string(sX + 24, sX + 248, sY + 65, m_game->m_guild_op_list[0].name.c_str(), GameColors::UILabel);
-	put_aligned_string(sX + 24, sX + 248, sY + 69, "____________________", GameColors::UIBlack);
+	put_aligned_string(sX + 24, sX + 248, sY + 78, "____________________", GameColors::UIBlack);
 	put_aligned_string(sX + 24, sX + 248, sY + 90, DRAW_DIALOGBOX_GUILD_OPERATION7);
 	put_aligned_string(sX + 24, sX + 248, sY + 105, DRAW_DIALOGBOX_GUILD_OPERATION8);
 	put_aligned_string(sX + 24, sX + 248, sY + 120, DRAW_DIALOGBOX_GUILD_OPERATION9);
@@ -80,21 +80,21 @@ void DialogBox_GuildOperation::draw_info_message(short sX, short sY, short mouse
 	case 3:
 		put_aligned_string(sX + 24, sX + 248, sY + 50, DRAW_DIALOGBOX_GUILD_OPERATION11);
 		put_aligned_string(sX + 24, sX + 248, sY + 65, m_game->m_guild_op_list[0].name.c_str(), GameColors::UILabel);
-		put_aligned_string(sX + 24, sX + 248, sY + 69, "____________________", GameColors::UIBlack);
+		put_aligned_string(sX + 24, sX + 248, sY + 78, "____________________", GameColors::UIBlack);
 		put_aligned_string(sX + 24, sX + 248, sY + 90, DRAW_DIALOGBOX_GUILD_OPERATION12);
 		put_aligned_string(sX + 24, sX + 248, sY + 105, DRAW_DIALOGBOX_GUILD_OPERATION13);
 		break;
 	case 4:
 		put_aligned_string(sX + 24, sX + 248, sY + 50, DRAW_DIALOGBOX_GUILD_OPERATION14);
 		put_aligned_string(sX + 24, sX + 248, sY + 65, m_game->m_guild_op_list[0].name.c_str(), GameColors::UILabel);
-		put_aligned_string(sX + 24, sX + 248, sY + 69, "____________________", GameColors::UIBlack);
+		put_aligned_string(sX + 24, sX + 248, sY + 78, "____________________", GameColors::UIBlack);
 		put_aligned_string(sX + 24, sX + 248, sY + 90, DRAW_DIALOGBOX_GUILD_OPERATION15);
 		put_aligned_string(sX + 24, sX + 248, sY + 105, DRAW_DIALOGBOX_GUILD_OPERATION16);
 		break;
 	case 5:
 		put_aligned_string(sX + 24, sX + 248, sY + 50, DRAW_DIALOGBOX_GUILD_OPERATION17);
 		put_aligned_string(sX + 24, sX + 248, sY + 65, m_game->m_guild_op_list[0].name.c_str(), GameColors::UILabel);
-		put_aligned_string(sX + 24, sX + 248, sY + 69, "____________________", GameColors::UIBlack);
+		put_aligned_string(sX + 24, sX + 248, sY + 78, "____________________", GameColors::UIBlack);
 		put_aligned_string(sX + 24, sX + 248, sY + 90, DRAW_DIALOGBOX_GUILD_OPERATION18);
 		put_aligned_string(sX + 24, sX + 248, sY + 105, DRAW_DIALOGBOX_GUILD_OPERATION19);
 		put_aligned_string(sX + 24, sX + 248, sY + 120, DRAW_DIALOGBOX_GUILD_OPERATION20);
@@ -102,7 +102,7 @@ void DialogBox_GuildOperation::draw_info_message(short sX, short sY, short mouse
 	case 6:
 		put_aligned_string(sX + 24, sX + 248, sY + 50, DRAW_DIALOGBOX_GUILD_OPERATION21);
 		put_aligned_string(sX + 24, sX + 248, sY + 65, m_game->m_guild_op_list[0].name.c_str(), GameColors::UILabel);
-		put_aligned_string(sX + 24, sX + 248, sY + 69, "____________________", GameColors::UIBlack);
+		put_aligned_string(sX + 24, sX + 248, sY + 78, "____________________", GameColors::UIBlack);
 		put_aligned_string(sX + 24, sX + 248, sY + 90, DRAW_DIALOGBOX_GUILD_OPERATION22);
 		put_aligned_string(sX + 24, sX + 248, sY + 105, DRAW_DIALOGBOX_GUILD_OPERATION23);
 		break;

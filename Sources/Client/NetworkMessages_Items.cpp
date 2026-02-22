@@ -659,10 +659,10 @@ namespace NetworkMessageHandlers {
 		memcpy(name, pkt->name, sizeof(pkt->name));
 
 		auto itemInfo8 = item_name_formatter::get().format(game->m_item_list[item_index].get());
-		if (amount == 1) txt = std::format(NOTIFYMSG_CANNOT_GIVE_ITEM2, itemInfo8.name.c_str(), name);
-		else txt = std::format(NOTIFYMSG_CANNOT_GIVE_ITEM1, amount, itemInfo8.name.c_str(), name);
+		txt = std::format(NOTIFYMSG_CANNOT_GIVE_ITEM2, itemInfo8.name.c_str(), name);
 
 		game->add_event_list(txt.c_str(), 10);
+		game->m_is_item_disabled[item_index] = false;
 	}
 
 	void HandleItemColorChange(CGame* game, char* data)

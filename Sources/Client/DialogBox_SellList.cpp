@@ -56,15 +56,13 @@ void DialogBox_SellList::draw_item_list(short sX, short sY, short size_x, short 
 
 			if (m_game->m_sell_item_list[i].amount > 1)
 			{
-				// Multiple items
-				txt = std::format(DRAW_DIALOGBOX_SELL_LIST1, m_game->m_sell_item_list[i].amount, itemInfo.name.c_str());
-
+				// Multiple items — itemInfo.name already includes the count prefix
 				if (hover)
-					put_aligned_string(sX, sX + size_x, sY + 55 + row * 15, txt.c_str(), GameColors::UIWhite);
+					put_aligned_string(sX, sX + size_x, sY + 55 + row * 15, itemInfo.name.c_str(), GameColors::UIWhite);
 				else if (itemInfo.is_special)
-					put_aligned_string(sX, sX + size_x, sY + 55 + row * 15, txt.c_str(), GameColors::UIItemName_Special);
+					put_aligned_string(sX, sX + size_x, sY + 55 + row * 15, itemInfo.name.c_str(), GameColors::UIItemName_Special);
 				else
-					put_aligned_string(sX, sX + size_x, sY + 55 + row * 15, txt.c_str(), GameColors::UILabel);
+					put_aligned_string(sX, sX + size_x, sY + 55 + row * 15, itemInfo.name.c_str(), GameColors::UILabel);
 			}
 			else
 			{
@@ -243,10 +241,12 @@ bool DialogBox_SellList::on_item_drop(short mouse_x, short mouse_y)
 		}
 	}
 
-	// Can't sell gold
-	if (m_game->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Gold)
+	// Can't sell gold or arrows
+	if (m_game->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Gold ||
+		m_game->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Arrow)
 	{
-		add_event_list(BITEMDROP_SELLLIST2, 10);
+		auto msg = std::format(NOTIFYMSG_CANNOT_SELL_ITEM3, m_game->m_item_list[item_id]->m_name);
+		add_event_list(msg.c_str(), 10);
 		return false;
 	}
 

@@ -17,6 +17,8 @@ constexpr std::string_view email_allowed_chars =
 	R"(abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@.)";
 constexpr std::string_view character_name_allowed_chars =
 	R"(abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-)";
+constexpr std::string_view guild_name_allowed_chars =
+	R"(abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-!@#$%^&*)";
 constexpr std::string_view digits_only = "0123456789";
 
 // Draws a text_input control: text (masked if hidden), cursor, selection highlight.

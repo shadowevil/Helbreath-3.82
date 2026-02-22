@@ -25,9 +25,9 @@ constexpr const char* NAME_WORLDNAME1 = "WS1";
 //#define DEF_TEST_SERVER // Comment this out to use local IP instead of public test server
 
 //#if defined(_DEBUG) && defined(DEF_TEST_SERVER)
-constexpr const char* DEF_SERVER_IP = "199.187.160.239";
+//constexpr const char* DEF_SERVER_IP = "199.187.160.239";
 //#else
-//constexpr const char* DEF_SERVER_IP = "127.0.0.1";
+constexpr const char* DEF_SERVER_IP = "127.0.0.1";
 //#endif
 constexpr const int DEF_SERVER_PORT = 2500;
 constexpr const int DEF_GSERVER_PORT = 9907;

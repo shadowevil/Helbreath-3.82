@@ -71,7 +71,7 @@ void DialogBox_NpcActionQuery::DrawMode1_GiveToPlayer(short sX, short sY, short 
 
 	draw_new_dialog_box(InterfaceNdGame2, sX, sY, 6);
 	auto itemInfo = item_name_formatter::get().format(m_game->m_item_list[Info().m_v1].get());
-	txt = std::format(DRAW_DIALOGBOX_NPCACTION_QUERY29, Info().m_v3, itemInfo.name.c_str());
+	txt = std::format("{} to", itemInfo.name);
 	txt2 = std::format(DRAW_DIALOGBOX_NPCACTION_QUERY29_1, Info().m_str);
 
 	put_string(sX + 24, sY + 25, txt.c_str(), GameColors::UILabel);
@@ -89,7 +89,7 @@ void DialogBox_NpcActionQuery::DrawMode2_SellToShop(short sX, short sY, short mo
 	draw_new_dialog_box(InterfaceNdGame2, sX, sY, 5);
 	auto itemInfo2 = item_name_formatter::get().format(m_game->m_item_list[Info().m_v1].get());
 
-	txt = std::format(DRAW_DIALOGBOX_NPCACTION_QUERY29, Info().m_v3, itemInfo2.name.c_str());
+	txt = std::format("{} to", itemInfo2.name);
 	txt2 = std::format(DRAW_DIALOGBOX_NPCACTION_QUERY29_1, Info().m_str);
 
 	put_string(sX + 24, sY + 20, txt.c_str(), GameColors::UILabel);
@@ -114,7 +114,7 @@ void DialogBox_NpcActionQuery::DrawMode3_DepositToWarehouse(short sX, short sY, 
 	draw_new_dialog_box(InterfaceNdGame2, sX, sY, 6);
 	auto itemInfo3 = item_name_formatter::get().format(m_game->m_item_list[Info().m_v1].get());
 
-	txt = std::format(DRAW_DIALOGBOX_NPCACTION_QUERY29, Info().m_v3, itemInfo3.name.c_str());
+	txt = std::format("{} to", itemInfo3.name);
 	txt2 = std::format(DRAW_DIALOGBOX_NPCACTION_QUERY29_1, Info().m_str);
 
 	put_aligned_string(sX, sX + 240, sY + 20, txt.c_str(), GameColors::UILabel);

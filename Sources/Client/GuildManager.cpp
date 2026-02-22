@@ -73,6 +73,7 @@ void guild_manager::handle_disband_guild_response(char* data)
 	switch (header->msg_type) {
 	case MsgType::Confirm:
 		m_game->m_player->m_guild_rank = -1;
+		m_game->m_player->m_guild_name.clear();
 		m_game->m_dialog_box_manager.Info(DialogBoxId::GuildMenu).m_mode = 7;
 		break;
 	case MsgType::Reject:
@@ -93,8 +94,10 @@ void guild_manager::handle_guild_disbanded(char* data)
 	m_game->m_dialog_box_manager.enable_dialog_box(DialogBoxId::GuildOperation, 0, 0, 0);
 	m_game->put_guild_operation_list(name, 7);
 	m_game->m_player->m_guild_rank = -1;
+	m_game->m_player->m_guild_name.clear();
 	m_game->m_location.assign(location, strnlen(location, hb::shared::limits::MapNameLen));
 	update_location_flags(m_game, m_game->m_location.c_str());
+	m_game->clear_guild_name_list();
 }
 
 void guild_manager::handle_new_guilds_man(char* data)
@@ -155,8 +158,10 @@ void guild_manager::handle_join_guild_approve(char* data)
 	memcpy(name, pkt->guild_name, sizeof(pkt->guild_name));
 	rank = pkt->rank;
 	m_game->m_player->m_guild_name = name;
+	std::replace(m_game->m_player->m_guild_name.begin(), m_game->m_player->m_guild_name.end(), '_', ' ');
 	m_game->m_player->m_guild_rank = rank;
 	m_game->m_dialog_box_manager.enable_dialog_box(DialogBoxId::GuildOperation, 0, 0, 0);
+	CMisc::replace_string(name, '_', ' ');
 	m_game->put_guild_operation_list(name, 3);
 }
 
@@ -179,9 +184,12 @@ void guild_manager::handle_dismiss_guild_approve(char* data)
 	if (!pkt) return;
 	memcpy(name, pkt->guild_name, sizeof(pkt->guild_name));
 	memcpy(location, pkt->location, sizeof(pkt->location));
+	CMisc::replace_string(name, '_', ' ');
 	m_game->m_player->m_guild_rank = -1;
+	m_game->m_player->m_guild_name.clear();
 	m_game->m_location.assign(location, strnlen(location, hb::shared::limits::MapNameLen));
 	update_location_flags(m_game, m_game->m_location.c_str());
+	m_game->clear_guild_name_list();
 	m_game->m_dialog_box_manager.enable_dialog_box(DialogBoxId::GuildOperation, 0, 0, 0);
 	m_game->put_guild_operation_list(name, 5);
 }
@@ -232,6 +240,7 @@ void guild_manager::handle_req_guild_name_answer(char* data)
 
 	m_game->m_guild_name_cache[v2].guild_name = temp;
 	m_game->m_guild_name_cache[v2].guild_rank = v1;
+	m_game->m_guild_name_cache[v2].ref_time = m_game->m_cur_time;
 	std::replace(m_game->m_guild_name_cache[v2].guild_name.begin(), m_game->m_guild_name_cache[v2].guild_name.end(), '_', ' ');
 }
 

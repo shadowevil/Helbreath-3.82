@@ -1352,6 +1352,38 @@ void ItemManager::give_item_handler(int client_h, short item_index, int amount, 
 
 					}
 				}
+				else if (m_game->m_npc_list[owner_h]->m_type == 26) { // Kennedy (GuildHall Officer)
+					if ((m_game->m_is_crusade_mode == false) && (m_game->m_client_list[client_h]->m_item_list[item_index]->m_id_num == hb::shared::item::ItemId::GuildSecessionTicket)) {
+
+						if ((m_game->m_client_list[client_h]->m_guild_rank == 0) || (m_game->m_client_list[client_h]->m_guild_rank == -1)) {
+							// Guild master cannot leave via ticket (must disband), guildless players can't use it
+							m_game->send_notify_msg(0, client_h, Notify::CannotGiveItem, item_index, amount, 0, char_name);
+							m_game->calc_total_weight(client_h);
+							return;
+						}
+
+						m_game->send_notify_msg(client_h, client_h, CommonType::DismissGuildApprove, 0, 0, 0, 0);
+
+						std::memset(m_game->m_client_list[client_h]->m_guild_name, 0, sizeof(m_game->m_client_list[client_h]->m_guild_name));
+						memcpy(m_game->m_client_list[client_h]->m_guild_name, "NONE", 4);
+						m_game->m_client_list[client_h]->m_guild_rank = -1;
+						m_game->m_client_list[client_h]->m_guild_guid = -1;
+
+						m_game->send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::NullAction, 0, 0, 0);
+
+						m_game->m_client_list[client_h]->m_exp -= 300;
+						if (m_game->m_client_list[client_h]->m_exp < 0) m_game->m_client_list[client_h]->m_exp = 0;
+						m_game->send_notify_msg(0, client_h, Notify::Exp, 0, 0, 0, 0);
+
+						delete m_game->m_client_list[client_h]->m_item_list[item_index];
+					}
+					else {
+						// Kennedy only accepts secession tickets — reject other items
+						m_game->send_notify_msg(0, client_h, Notify::CannotGiveItem, item_index, amount, 0, char_name);
+						m_game->calc_total_weight(client_h);
+						return;
+					}
+				}
 				else {
 					// NPC cannot receive items — reject and keep item in inventory
 					m_game->send_notify_msg(0, client_h, Notify::CannotGiveItem, item_index, amount, 0, char_name);
@@ -2600,8 +2632,9 @@ void ItemManager::req_sell_item_handler(int client_h, char item_id, char sell_to
 	if (num <= 0) return;
 	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_count < static_cast<uint32_t>(num)) return;
 
-	// Can't sell gold
-	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Gold)
+	// Can't sell gold or arrows
+	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Gold ||
+		m_game->m_client_list[client_h]->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Arrow)
 	{
 		m_game->send_notify_msg(0, client_h, Notify::CannotSellItem, item_id, 1, 0, m_game->m_client_list[client_h]->m_item_list[item_id]->m_name);
 		return;
@@ -2774,8 +2807,9 @@ void ItemManager::req_sell_item_confirm_handler(int client_h, char item_id, int 
 	if (num <= 0) return;
 	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_count < static_cast<uint32_t>(num)) return;
 
-	// Can't sell gold
-	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Gold) return;
+	// Can't sell gold or arrows
+	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Gold ||
+		m_game->m_client_list[client_h]->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Arrow) return;
 
 	// New 18/05/2004
 	if (m_game->m_client_list[client_h]->m_is_processing_allowed == false) return;

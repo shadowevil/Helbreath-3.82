@@ -13,7 +13,7 @@ DialogBox_GuildMenu::DialogBox_GuildMenu(CGame* game)
 	: IDialogBox(DialogBoxId::GuildMenu, game)
 {
 	set_default_rect(497 , 57 , 258, 339);
-	set_can_close_on_right_click(false);
+	set_can_close_on_right_click(true);
 }
 
 void DialogBox_GuildMenu::on_draw(short mouse_x, short mouse_y, short z, char lb)
@@ -38,8 +38,8 @@ void DialogBox_GuildMenu::on_draw(short mouse_x, short mouse_y, short z, char lb
 	case 3:
 		put_aligned_string(sX, sX + size_x, sY + 125, DRAW_DIALOGBOX_GUILDMENU20, GameColors::UILabel);
 		put_aligned_string(sX, sX + size_x, sY + 140, m_game->m_player->m_guild_name.c_str(), GameColors::UILabel);
-		put_aligned_string(sX, sX + size_x, sY + 144, "____________________", GameColors::UILabel);
-		put_aligned_string(sX, sX + size_x, sY + 160, DRAW_DIALOGBOX_GUILDMENU21, GameColors::UILabel);
+		put_aligned_string(sX, sX + size_x, sY + 150, "____________________", GameColors::UILabel);
+		put_aligned_string(sX, sX + size_x, sY + 165, DRAW_DIALOGBOX_GUILDMENU21, GameColors::UILabel);
 		if ((mouse_x >= sX + ui_layout::right_btn_x) && (mouse_x <= sX + ui_layout::right_btn_x + ui_layout::btn_size_x) && (mouse_y > sY + ui_layout::btn_y) && (mouse_y < sY + ui_layout::btn_y + ui_layout::btn_size_y))
 			m_game->draw_new_dialog_box(InterfaceNdButton, sX + ui_layout::right_btn_x, sY + ui_layout::btn_y, 1);
 		else m_game->draw_new_dialog_box(InterfaceNdButton, sX + ui_layout::right_btn_x, sY + ui_layout::btn_y, 0);
@@ -196,8 +196,8 @@ void DialogBox_GuildMenu::DrawMode0_MainMenu(short sX, short sY, short size_x, s
 
 void DialogBox_GuildMenu::DrawMode1_CreateGuild(short sX, short sY, short size_x, short mouse_x, short mouse_y)
 {
-	put_aligned_string(sX + 24, sX + 239, sY + 125, DRAW_DIALOGBOX_GUILDMENU18, GameColors::UILabel);
-	put_string(sX + 75, sY + 144, "____________________", GameColors::UILabel);
+	put_aligned_string(sX, sX + size_x, sY + 125, DRAW_DIALOGBOX_GUILDMENU18, GameColors::UILabel);
+	put_string(sX + 75, sY + 150, "____________________", GameColors::UILabel);
 
 	if (m_game->m_dialog_box_manager.get_top_dialog_box_index() != DialogBoxId::GuildMenu) {
 		std::string masked(m_game->m_player->m_guild_name.size(), '*');
@@ -221,11 +221,11 @@ void DialogBox_GuildMenu::DrawMode5_DisbandConfirm(short sX, short sY, short siz
 {
 	put_aligned_string(sX, sX + size_x, sY + 90, DRAW_DIALOGBOX_GUILDMENU24);
 	put_aligned_string(sX, sX + size_x, sY + 105, m_game->m_player->m_guild_name.c_str(), GameColors::UILabel);
-	put_aligned_string(sX, sX + size_x, sY + 109, "____________________", GameColors::UIBlack);
+	put_aligned_string(sX, sX + size_x, sY + 118, "____________________", GameColors::UIBlack);
 	put_aligned_string(sX, sX + size_x, sY + 130, DRAW_DIALOGBOX_GUILDMENU25);
 	put_aligned_string(sX, sX + size_x, sY + 145, DRAW_DIALOGBOX_GUILDMENU26);
 	put_aligned_string(sX, sX + size_x, sY + 160, DRAW_DIALOGBOX_GUILDMENU27);
-	put_aligned_string(sX, sX + size_x, sY + 185, DRAW_DIALOGBOX_GUILDMENU28, GameColors::UILabel);
+	put_aligned_string(sX, sX + size_x, sY + 175, DRAW_DIALOGBOX_GUILDMENU28, GameColors::UILabel);
 
 	if ((mouse_x >= sX + ui_layout::left_btn_x) && (mouse_x <= sX + ui_layout::left_btn_x + ui_layout::btn_size_x) && (mouse_y >= sY + ui_layout::btn_y) && (mouse_y <= sY + ui_layout::btn_y + ui_layout::btn_size_y))
 		m_game->draw_new_dialog_box(InterfaceNdButton, sX + ui_layout::left_btn_x, sY + ui_layout::btn_y, 19);
@@ -240,7 +240,7 @@ void DialogBox_GuildMenu::DrawMode9_AdmissionTicket(short sX, short sY, short si
 {
 	CItem* cfg = m_game->get_item_config(hb::shared::item::ItemId::GuildAdmissionTicket);
 	int price = cfg ? static_cast<int>(cfg->m_price) : 0;
-	put_aligned_string(sX, sX + size_x, sY + ADJY + 60, DRAW_DIALOGBOX_GUILDMENuint32_t);
+	put_aligned_string(sX, sX + size_x, sY + ADJY + 60, DRAW_DIALOGBOX_GUILDMENU32);
 	put_aligned_string(sX, sX + size_x, sY + ADJY + 75, std::format(DRAW_DIALOGBOX_GUILDMENU33, price).c_str());
 	put_aligned_string(sX, sX + size_x, sY + ADJY + 90, DRAW_DIALOGBOX_GUILDMENU34);
 	put_aligned_string(sX, sX + size_x, sY + ADJY + 105, DRAW_DIALOGBOX_GUILDMENU35);
@@ -321,7 +321,7 @@ void DialogBox_GuildMenu::DrawMode13_FightzoneSelect(short sX, short sY, short s
 void DialogBox_GuildMenu::DrawMode20_ConfirmCancel(short sX, short sY, short size_x, short mouse_x, short mouse_y)
 {
 	put_aligned_string(sX, sX + size_x, sY + 125, DRAW_DIALOGBOX_GUILDMENU75, GameColors::UILabel);
-	put_string(sX + 75, sY + 144, "____________________", GameColors::UILabel);
+	put_string(sX + 75, sY + 150, "____________________", GameColors::UILabel);
 	hb::shared::text::draw_text(GameFont::Default, sX + 75, sY + 140, m_game->m_player->m_guild_name.c_str(), hb::shared::text::TextStyle::from_color(GameColors::UIWhite));
 	if ((mouse_x >= sX + ui_layout::left_btn_x) && (mouse_x <= sX + ui_layout::left_btn_x + ui_layout::btn_size_x) && (mouse_y >= sY + ui_layout::btn_y) && (mouse_y <= sY + ui_layout::btn_y + ui_layout::btn_size_y))
 		m_game->draw_new_dialog_box(InterfaceNdButton, sX + ui_layout::left_btn_x, sY + ui_layout::btn_y, 25);
@@ -376,7 +376,7 @@ bool DialogBox_GuildMenu::on_click_mode0(short sX, short sY, short mouse_x, shor
 		if (m_game->m_player->m_level < 20) return false;
 		if (m_game->m_is_crusade_mode) return false;
 		text_input_manager::get().end_input();
-		text_input_manager::get().start_input(sX + 75, sY + 140, 21, m_game->m_player->m_guild_name, false, hb::client::character_name_allowed_chars);
+		text_input_manager::get().start_input(sX + 75, sY + 140, 21, m_game->m_player->m_guild_name, false, hb::client::guild_name_allowed_chars);
 		Info().m_mode = 1;
 		play_sound_effect('E', 14, 5);
 		return true;

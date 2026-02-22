@@ -236,7 +236,7 @@ void DialogBoxManager::enable_dialog_box(int box_id, int type, int64_t v1, int v
 			sX = Info(DialogBoxId::GuildMenu).m_x;
 			sY = Info(DialogBoxId::GuildMenu).m_y;
 			text_input_manager::get().end_input();
-			text_input_manager::get().start_input(sX + 75, sY + 140, 21, m_game->m_player->m_guild_name, false, hb::client::character_name_allowed_chars);
+			text_input_manager::get().start_input(sX + 75, sY + 140, 21, m_game->m_player->m_guild_name, false, hb::client::guild_name_allowed_chars);
 		}
 		break;
 

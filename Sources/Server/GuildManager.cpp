@@ -173,6 +173,9 @@ void GuildManager::response_disband_guild_handler(char* data, int type)
 				memcpy(m_game->m_client_list[i]->m_guild_name, "NONE", 4);
 				m_game->m_client_list[i]->m_guild_rank = -1;
 				m_game->m_client_list[i]->m_guild_guid = -1;
+				m_game->m_client_list[i]->m_fightzone_number = 0;
+				m_game->m_client_list[i]->m_reserve_time = 0;
+				m_game->m_client_list[i]->m_fightzone_ticket_number = 0;
 				break;
 
 			case 0: // LogResMsg::Reject
@@ -226,6 +229,7 @@ void GuildManager::join_guild_approve_handler(int client_h, const char* name)
 			m_game->send_notify_msg(client_h, i, CommonType::JoinGuildApprove, 0, 0, 0, 0);
 
 			m_game->send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::NullAction, 0, 0, 0);
+			m_game->send_event_to_near_client_type_a(i, hb::shared::owner_class::Player, MsgId::EventMotion, Type::NullAction, 0, 0, 0);
 
 			send_guild_msg(i, Notify::NewGuildsman, 0, 0, 0);
 
@@ -306,12 +310,16 @@ void GuildManager::send_guild_msg(int client_h, uint16_t notify_msg_type, short 
 					pkt.header.msg_id = MsgId::Notify;
 					pkt.header.msg_type = notify_msg_type;
 					memcpy(pkt.guild_name, m_game->m_client_list[client_h]->m_guild_name, sizeof(pkt.guild_name));
+					memcpy(pkt.location, m_game->m_client_list[i]->m_location, sizeof(pkt.location));
 					ret = m_game->m_client_list[i]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
 				}
 				std::memset(m_game->m_client_list[i]->m_guild_name, 0, sizeof(m_game->m_client_list[i]->m_guild_name));
 				strcpy(m_game->m_client_list[i]->m_guild_name, "NONE");
 				m_game->m_client_list[i]->m_guild_rank = -1;
 				m_game->m_client_list[i]->m_guild_guid = -1;
+				m_game->m_client_list[i]->m_fightzone_number = 0;
+				m_game->m_client_list[i]->m_reserve_time = 0;
+				m_game->m_client_list[i]->m_fightzone_ticket_number = 0;
 				break;
 
 			case Notify::EventMsgString:
