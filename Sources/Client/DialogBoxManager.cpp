@@ -473,15 +473,17 @@ bool DialogBoxManager::handle_double_click()
 	short mouse_x = static_cast<short>(hb::shared::input::get_mouse_x());
 	short mouse_y = static_cast<short>(hb::shared::input::get_mouse_y());
 
-	return for_each_top_to_bottom([&](IDialogBox* dlg) -> bool {
+	bool consumed = false;
+	for_each_top_to_bottom([&](IDialogBox* dlg) -> bool {
 		if (mouse_x > dlg->m_x && mouse_x < dlg->m_x + dlg->m_size_x &&
 			mouse_y > dlg->m_y && mouse_y < dlg->m_y + dlg->m_size_y)
 		{
-			dlg->on_double_click();
+			consumed = dlg->on_double_click();
 			return true;
 		}
 		return false;
 	});
+	return consumed;
 }
 
 PressResult DialogBoxManager::handle_press(int dlg_id)

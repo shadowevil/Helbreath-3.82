@@ -3762,7 +3762,7 @@ INSERT INTO "skill_configs" VALUES (15, '????', 1, 1, 0, 0, 0, 0, 0, 0, 0);
 INSERT INTO "skill_configs" VALUES (16, '????', 1, 1, 0, 0, 0, 0, 0, 0, 0);
 INSERT INTO "skill_configs" VALUES (17, '????', 1, 0, 0, 0, 0, 0, 0, 0, 0);
 INSERT INTO "skill_configs" VALUES (18, '????', 1, 1, 0, 0, 0, 0, 0, 0, 0);
-INSERT INTO "skill_configs" VALUES (19, 'Pretend-Corpse', 2, 1, 0, 0, 0, 0, 0, 1, 0);
+INSERT INTO "skill_configs" VALUES (19, 'Pretend-Corpse', 2, 1, 0, 0, 0, 0, 0, 1, 1);
 INSERT INTO "skill_configs" VALUES (20, '????', 1, 1, 0, 0, 0, 0, 0, 0, 0);
 INSERT INTO "skill_configs" VALUES (21, 'Staff-Attack', 0, 0, 0, 0, 0, 0, 0, 0, 0);
 INSERT INTO "skill_configs" VALUES (22, '????', 1, 2, 0, 0, 0, 0, 0, 0, 0);

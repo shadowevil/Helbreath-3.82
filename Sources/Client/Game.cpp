@@ -5860,6 +5860,8 @@ void CGame::command_processor(short mouse_x, short mouse_y, short tile_x, short 
 				{
 					CursorTarget::reset_selection_click_time(); // reset to prevent triple-click
 					double_click_consumed = m_dialog_box_manager.handle_double_click();
+					if (!double_click_consumed)
+						m_dialog_box_manager.handle_click();
 				}
 				else // Click
 				{
@@ -5887,7 +5889,8 @@ void CGame::command_processor(short mouse_x, short mouse_y, short tile_x, short 
 		{
 			if ((m_map_data->is_teleport_loc(m_player->m_player_x, m_player->m_player_y) == true) && (m_player->m_Controller.get_command_count() == 0)) break;
 
-			if ((CursorTarget::get_prev_x() != mouse_x) || (CursorTarget::get_prev_y() != mouse_y))
+			if ((abs(CursorTarget::get_prev_x() - mouse_x) > input_config::double_click_tolerance) ||
+				(abs(CursorTarget::get_prev_y() - mouse_y) > input_config::double_click_tolerance))
 			{
 				CursorTarget::set_cursor_status(CursorStatus::Dragging);
 				CursorTarget::set_prev_position(mouse_x, mouse_y);

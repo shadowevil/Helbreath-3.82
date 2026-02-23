@@ -123,7 +123,10 @@ void event_list_manager::show_events(uint32_t time)
 		}
 	if (m_game->m_skill_using_status == true)
 	{
-		hb::shared::text::draw_text(GameFont::Default, 440 - 29, 440 - 52, SHOW_EVENT_LIST1, hb::shared::text::TextStyle::with_shadow(GameColors::UINearWhite));
+		int text_w = hb::shared::text::GetTextRenderer()->measure_text(SHOW_EVENT_LIST1).width;
+		int text_x = (LOGICAL_WIDTH() - text_w) / 2;
+		int text_y = LOGICAL_HEIGHT() / 2 + 45;
+		hb::shared::text::draw_text(GameFont::Default, text_x, text_y, SHOW_EVENT_LIST1, hb::shared::text::TextStyle::with_shadow(GameColors::UINearWhite));
 	}
 	m_game->m_Renderer->end_text_batch();
 }

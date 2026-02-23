@@ -137,7 +137,7 @@ bool DialogBox_Skill::on_click()
 		for (i = 0; i < 17; i++)
 			if (((i + m_scroll_position) < hb::shared::limits::MaxSkillType) && (m_game->m_skill_cfg_list[i + m_scroll_position] != 0))
 			{
-				if ((mouse_x >= sX + 44) && (mouse_x <= sX + 135 + 44) && (mouse_y >= sY + 45 + i * 15) && (mouse_y <= sY + 59 + i * 15))
+				if ((mouse_x >= sX + 25) && (mouse_x <= sX + 166) && (mouse_y >= sY + 45 + i * 15) && (mouse_y <= sY + 59 + i * 15))
 				{
 					if ((m_game->m_skill_cfg_list[i + m_scroll_position]->m_is_useable == true)
 						&& (m_game->m_skill_cfg_list[i + m_scroll_position]->m_level != 0))
@@ -162,6 +162,11 @@ bool DialogBox_Skill::on_click()
 							send_command(MsgId::CommandCommon, CommonType::ReqUseSkill, 0, (i + m_scroll_position), 0, 0, 0);
 							m_game->m_skill_using_status = true;
 							disable_this_dialog();
+							play_sound_effect('E', 14, 5);
+							return true;
+						case 1:
+							send_command(MsgId::CommandCommon, CommonType::ReqUseSkill, 0, (i + m_scroll_position), 0, 0, 0);
+							m_game->m_skill_using_status = true;
 							play_sound_effect('E', 14, 5);
 							return true;
 						}
