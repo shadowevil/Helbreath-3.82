@@ -531,8 +531,8 @@ int DialogBoxManager::handle_mouse_down()
 		{
 			int id = static_cast<int>(dlg->get_id());
 
-			// Bring dialog to front
-			enable_dialog_box(id, 0, 0, 0);
+			// Bring dialog to front (don't re-trigger on_enable which resets dialog state)
+			bring_to_front(id);
 
 			// Set up drag tracking
 			CursorTarget::set_prev_position(mouse_x, mouse_y);
