@@ -1128,6 +1128,7 @@ bool CMapData::set_owner(uint16_t object_id, int sX, int sY, int type, direction
 			if ((m_data[iX][iY].m_dead_owner_frame == -1) && (m_data[iX][iY].m_dead_object_id == object_id))
 			{
 				m_data[iX][iY].m_dead_owner_frame = 0;
+				m_data[iX][iY].m_dead_owner_time = m_frame_time; // Reset timer for smooth fade
 				name.clear();
 				m_game->m_floating_text.clear(m_data[iX][iY].m_dead_chat_msg);
 				m_data[iX][iY].m_dead_chat_msg = 0;
@@ -1157,6 +1158,7 @@ bool CMapData::set_owner(uint16_t object_id, int sX, int sY, int type, direction
 				if ((m_data[iX][iY].m_dead_owner_frame == -1) && (m_data[iX][iY].m_dead_object_id == object_id))
 				{
 					m_data[iX][iY].m_dead_owner_frame = 0;
+					m_data[iX][iY].m_dead_owner_time = m_frame_time; // Reset timer for smooth fade
 					name.clear();
 					m_game->m_floating_text.clear(m_data[iX][iY].m_dead_chat_msg);
 					m_data[iX][iY].m_dead_chat_msg = 0;
@@ -1946,9 +1948,11 @@ int CMapData::object_frame_counter(const std::string& player_name, short view_po
 			// Dead think 00496F43
 			if (m_data[dX][dY].m_dead_owner_type != 0)
 			{
-				if ((m_data[dX][dY].m_dead_owner_frame == -1) && ((time - m_data[dX][dY].m_dead_owner_time) > corpse_linger_time_ms))
+				// Player corpses persist until revive/restart — only NPC corpses auto-fade
+				bool is_player_corpse = hb::shared::owner::is_player(m_data[dX][dY].m_dead_owner_type);
+				if (!is_player_corpse && (m_data[dX][dY].m_dead_owner_frame == -1) && ((time - m_data[dX][dY].m_dead_owner_time) > corpse_linger_time_ms))
 				{
-					// Auto-start fade after linger delay
+					// Auto-start fade after linger delay (NPCs only)
 					m_data[dX][dY].m_dead_owner_frame = 0;
 					m_data[dX][dY].m_dead_owner_time = time;
 					if (ret == 0)

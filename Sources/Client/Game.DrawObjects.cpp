@@ -445,7 +445,30 @@ void CGame::draw_objects(short pivot_x, short pivot_y, short div_x, short div_y,
 
 				if ((ret == true) && (m_entity_state.m_object_id != 0))
 				{
-					(void)draw_object_on_dead(indexX, indexY, ix, iy, false, time);
+					auto dead_bounds = draw_object_on_dead(indexX, indexY, ix, iy, false, time);
+
+					// Enable hover name for player corpses
+					if (m_entity_state.is_player())
+					{
+						TargetObjectInfo info = {};
+						info.m_object_id = m_entity_state.m_object_id;
+						info.m_map_x = indexX;
+						info.m_map_y = indexY;
+						info.m_screen_x = ix;
+						info.m_screen_y = iy;
+						info.m_data_x = m_entity_state.m_data_x;
+						info.m_data_y = m_entity_state.m_data_y;
+						info.m_owner_type = m_entity_state.m_owner_type;
+						info.m_npc_config_id = m_entity_state.m_npc_config_id;
+						info.m_action = ObjectDead;
+						info.m_direction = m_entity_state.m_dir;
+						info.m_frame = m_entity_state.m_frame;
+						info.m_name = m_entity_state.m_name.data();
+						info.m_appearance = m_entity_state.m_appearance;
+						info.m_status = m_entity_state.m_status;
+						info.m_type = FocusedObjectType::DeadBody;
+						CursorTarget::test_object(dead_bounds, info, iy, res_msy);
+					}
 				}
 
 				m_entity_state.m_object_id = m_entity_state.m_owner_type = 0; m_entity_state.m_status.clear();
